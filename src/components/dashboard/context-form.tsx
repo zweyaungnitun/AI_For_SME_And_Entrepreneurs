@@ -27,7 +27,7 @@ export function ContextForm({
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
       >
-        <span className="text-sm font-semibold">Business / venture</span>
+        <span className="text-sm font-semibold">This week&apos;s numbers</span>
         <span className="text-xs text-muted">{open ? "Hide" : "Edit"}</span>
       </button>
       {open ? (

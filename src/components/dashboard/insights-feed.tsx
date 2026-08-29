@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { HealthBadge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
 import type { BriefInsight } from "@/lib/brief/types";
 
 const PILLAR: Record<string, string> = {
@@ -11,28 +10,34 @@ const PILLAR: Record<string, string> = {
   market: "Market",
 };
 
-export function InsightsFeed({ insights }: { insights: BriefInsight[] }) {
+export function InsightsFeed({
+  insights,
+  heading = "More from this week",
+}: {
+  insights: BriefInsight[];
+  heading?: string;
+}) {
   if (insights.length === 0) {
     return (
-      <Card>
+      <section className="rounded-[12px] border border-border bg-surface p-5">
         <p className="text-sm text-muted">Run Analyze to generate insights.</p>
-      </Card>
+      </section>
     );
   }
 
   return (
-    <Card className="space-y-3">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">
-          AI insights
+    <section className="space-y-3">
+      {heading ? (
+        <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">
+          {heading}
         </h2>
-      </div>
-      <ul className="divide-y divide-border">
+      ) : null}
+      <ul className="divide-y divide-border rounded-[12px] border border-border bg-surface">
         {insights.map((insight) => (
           <li key={insight.id}>
             <Link
               href={`/insight?id=${insight.id}`}
-              className="flex items-start justify-between gap-4 py-3 hover:opacity-80"
+              className="flex items-start justify-between gap-4 px-5 py-4 hover:bg-[#f8f9fb]"
             >
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-primary">
@@ -46,6 +51,6 @@ export function InsightsFeed({ insights }: { insights: BriefInsight[] }) {
           </li>
         ))}
       </ul>
-    </Card>
+    </section>
   );
 }
