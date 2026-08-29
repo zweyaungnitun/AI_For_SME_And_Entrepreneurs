@@ -14,13 +14,13 @@ export function ProductPreview() {
           <span className="h-2.5 w-2.5 rounded-full bg-[#fecaca]" />
           <span className="h-2.5 w-2.5 rounded-full bg-[#fde68a]" />
           <span className="h-2.5 w-2.5 rounded-full bg-[#bbf7d0]" />
-          <span className="ml-3 text-xs text-muted">dashboard · Hlaing Mini Mart</span>
+          <span className="ml-3 text-xs text-muted">dashboard · Daw Hla's Dry Goods</span>
         </div>
         <div className="grid gap-4 p-5 sm:grid-cols-3">
           <div className="sm:col-span-3 flex flex-wrap items-center justify-between gap-2 rounded-[12px] bg-[#fffbeb] px-4 py-3">
             <span className="text-sm font-medium">Business health</span>
-            <span className="rounded-full bg-[#fff7ed] px-3 py-1 text-xs font-semibold text-watch">
-              WATCH
+            <span className="rounded-full bg-[#fef2f2] px-3 py-1 text-xs font-semibold text-risk">
+              TIGHT
             </span>
           </div>
           <PreviewMetric label="Cash" value="420,000" />
@@ -30,9 +30,9 @@ export function ProductPreview() {
             <p className="text-xs font-semibold uppercase tracking-wide text-primary">
               Today&apos;s priority
             </p>
-            <p className="mt-2 font-semibold">Follow up with 3 overdue customers</p>
+            <p className="mt-2 font-semibold">Collect Ko Min first</p>
             <p className="mt-1 text-sm text-muted">
-              Collect Maung Maung first — 200,000 MMK, 7 days overdue.
+              200,000 MMK overdue 7 days. Do not restock Product A.
             </p>
           </div>
         </div>

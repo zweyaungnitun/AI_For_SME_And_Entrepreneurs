@@ -1,16 +1,14 @@
+import { actionAgent } from "@/lib/agents/specialists/action";
+import { booksAgent } from "@/lib/agents/specialists/books";
 import { financeAgent } from "@/lib/agents/specialists/finance";
-import { growthAgent } from "@/lib/agents/specialists/growth";
-import { marketAgent } from "@/lib/agents/specialists/market";
 import { opsAgent } from "@/lib/agents/specialists/ops";
-import { strategyAgent } from "@/lib/agents/specialists/strategy";
 import type { AgentId, SpecialistDef } from "@/lib/agents/types";
 
 export const specialists: SpecialistDef[] = [
-  strategyAgent,
   financeAgent,
-  marketAgent,
-  growthAgent,
   opsAgent,
+  booksAgent,
+  actionAgent,
 ];
 
 export const specialistMap = Object.fromEntries(

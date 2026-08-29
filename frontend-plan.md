@@ -15,7 +15,7 @@
 - [ ] Dashboard `/dashboard` — health badge, metrics, today's priority, insights feed, Analyze CTA
 - [ ] Insight `/insight` — full analysis sections, evidence, recommended action
 - [ ] Voice `/voice` — mic waveform, transcript, Talk + text fallback, browser Speech APIs
-- [ ] Backend wiring — handle SSE `done` event; `build-from-memos.ts` + `demo-data.ts` fallback
+- [x] Backend wiring — handle SSE `done` event + `card`; snapshot from dashboard financials
 - [ ] Polish — responsive (375px), loading/error/empty states, `npm run build`, demo rehearsed
 
 ---

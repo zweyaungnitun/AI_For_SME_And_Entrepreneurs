@@ -17,8 +17,8 @@ export default function Home() {
             Open the dashboard. See today&apos;s priority in under a minute.
           </h2>
           <p className="mt-3 max-w-xl text-sm text-white/70">
-            Demo data is already loaded for Hlaing Mini Mart — cash, credit, and
-            supplier bills. Analyze again any time.
+            Demo data is already loaded for Daw Hla&apos;s Dry Goods — cash, credit,
+            and the 5-day supplier payable. Analyze again any time.
           </p>
           <div className="mt-6">
             <Button href="/dashboard" className="bg-white text-ink hover:bg-[#e5e7eb]">

@@ -8,13 +8,14 @@ import {
   useMemo,
   useState,
 } from "react";
-import { buildBriefFromMemos } from "@/lib/brief/build-from-memos";
+import { buildBriefFromCard, buildBriefFromMemos } from "@/lib/brief/build-from-memos";
 import { composeAnalyzePrompt, DEMO_SNAPSHOT } from "@/lib/brief/demo-data";
 import { runCrewStream } from "@/lib/brief/run-crew";
+import { ledgerFromFinancials } from "@/lib/brief/snapshot";
 import type { BusinessSnapshot, FinancialInputs } from "@/lib/brief/types";
 import type { BusinessContext } from "@/lib/agents/types";
 
-const STORAGE_KEY = "sme-copilot-brief";
+const STORAGE_KEY = "sme-copilot-brief-v2";
 
 type AnalyzeStatus = "idle" | "running" | "done";
 
@@ -83,10 +84,16 @@ export function BriefProvider({ children }: { children: React.ReactNode }) {
       let lastReply = "";
 
       await runCrewStream(
-        { message: prompt, sessionId, context: snapshot.context },
+        {
+          message: prompt,
+          sessionId,
+          shopId: "daw-hla",
+          context: snapshot.context,
+          snapshot: ledgerFromFinancials(snapshot.financials),
+        },
         (event) => {
           if (event.type === "error") {
-            setError("Unable to analyze the business right now. Please try again.");
+            setError(event.error || "Unable to analyze the shop right now. Please try again.");
             return;
           }
           if (event.type === "session") {
@@ -101,7 +108,9 @@ export function BriefProvider({ children }: { children: React.ReactNode }) {
           if (event.type === "done") {
             lastReply = event.reply || acc;
             setSnapshot((current) =>
-              buildBriefFromMemos(event.memos, event.reply, current),
+              event.card
+                ? buildBriefFromCard(event.card, event.memos, event.reply, current)
+                : buildBriefFromMemos(event.memos, event.reply, current),
             );
             setStreamingReply(lastReply);
             onToken?.(lastReply);

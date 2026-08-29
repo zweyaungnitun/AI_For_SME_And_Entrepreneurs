@@ -1,11 +1,16 @@
 import type { AgentEvent, BusinessContext } from "@/lib/agents/types";
+import type { Ledger } from "@/lib/ledger/types";
 
-export type CrewStreamEvent =
-  | AgentEvent
-  | { type: "error"; error: string };
+export type CrewStreamEvent = AgentEvent;
 
 export async function runCrewStream(
-  input: { message: string; sessionId?: string; context: BusinessContext },
+  input: {
+    message: string;
+    sessionId?: string;
+    shopId?: string;
+    context: BusinessContext;
+    snapshot?: Partial<Ledger>;
+  },
   onEvent: (event: CrewStreamEvent) => void,
 ) {
   const res = await fetch("/api/agents/run", {
@@ -15,7 +20,7 @@ export async function runCrewStream(
   });
 
   if (!res.ok || !res.body) {
-    onEvent({ type: "error", error: "Unable to analyze the business right now." });
+    onEvent({ type: "error", error: "Unable to analyze the shop right now." });
     return;
   }
 

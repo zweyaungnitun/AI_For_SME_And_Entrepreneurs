@@ -1,48 +1,39 @@
+import { mmk } from "@/lib/ledger/types";
+import { analyzeLedger } from "@/lib/ledger/analyze";
 import type { SpecialistDef } from "@/lib/agents/types";
 
 export const financeAgent: SpecialistDef = {
   id: "finance",
   name: "Finance",
-  title: "Price, margin, cash",
-  blurb: "Turns a gut-feel price into contribution margin, payback, and a cash rule the team can keep.",
+  title: "One cash action",
+  blurb: "Reads payables vs till and ranked credit. Picks who to collect or what spend to delay.",
   accent: "#d4a017",
-  keywords: [
-    "price",
-    "pricing",
-    "margin",
-    "cash",
-    "cost",
-    "cogs",
-    "profit",
-    "unit",
-    "budget",
-    "break-even",
-  ],
-  tools: ["unit_economics"],
-  system: `You are Foundry's Finance agent for SMEs.
-Use simple unit economics. Name assumptions. Never fake audited numbers.
-Give a price floor, a contribution target, and one cash rule.
-If data is missing, state the assumption and still give a usable range.`,
-  demo: ({ context, tools }) => {
-    const econ = tools.find((t) => t.name === "unit_economics")?.output as
-      | {
-          price: number;
-          grossMargin: string;
-          ordersToRecoverCac: number | null;
-          first100Contribution: number;
-        }
+  keywords: ["cash", "pay", "collect", "rent", "bill", "ငွေ", "အကြွေး"],
+  tools: ["cash_pressure", "receivable_rank", "search_knowledge"],
+  system: `You are Foundry Finance for any Myanmar SME.
+Use ONLY tool numbers. Pick ONE action for 24-48h: collect a named debtor or delay a named payable/spend.
+Never invent MMK. Never approve a loan. Return JSON {summary, bullets}.`,
+  demo: ({ ledger, tools }) => {
+    const snap = analyzeLedger(ledger);
+    const top = snap.topCustomer;
+    const knowledge = tools.find((t) => t.name === "search_knowledge")?.output as
+      | { hits?: Array<{ title: string }>; source?: string }
       | undefined;
+    const practice = knowledge?.hits?.[0]?.title;
     return {
-      summary: `Price ${context.name} as a gift-grade product, not a commodity. Protect contribution before chasing volume.`,
+      summary: snap.tight
+        ? `TIGHT: payables ${mmk(snap.nearTotal)} vs cash ${mmk(snap.cashOnHand)}.`
+        : `Cash ${mmk(snap.cashOnHand)} covers near payables ${mmk(snap.nearTotal)}.`,
       bullets: [
-        econ
-          ? `Working model: ~${econ.grossMargin} gross margin at $${econ.price} with ~${econ.ordersToRecoverCac ?? "n/a"} orders to recover CAC.`
-          : "Set a contribution target of at least 50% after packaging and delivery.",
-        "Cash rule: no new SKU until the current kit has 30 paid orders.",
-        econ
-          ? `First 100 customers at this model put ~$${econ.first100Contribution} of contribution on the table — enough to fund the next batch, not a hire.`
-          : "Hold a 4-week cash buffer in inventory + delivery.",
-        "Track weekly: orders, contribution, and cash on hand. Not vanity followers.",
+        top
+          ? `Collect ${top.customer} first (${mmk(top.amount)}, ${top.overdueDays}d).`
+          : "No overdue credit in this snapshot.",
+        snap.tight
+          ? "Do not add new unpaid work or restock until that cash is in."
+          : "Keep a 7-day payable list next to the till.",
+        practice
+          ? `Practice (${knowledge?.source}): ${practice}. Ledger numbers still win.`
+          : "This is cash timing, not a bank score.",
       ],
     };
   },

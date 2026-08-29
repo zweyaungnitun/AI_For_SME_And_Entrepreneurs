@@ -4,7 +4,7 @@ import type { HealthStatus } from "@/lib/brief/types";
 const healthStyles: Record<HealthStatus, string> = {
   OK: "bg-[#ecfdf5] text-ok",
   WATCH: "bg-[#fffbeb] text-watch",
-  RISK: "bg-[#fef2f2] text-risk",
+  TIGHT: "bg-[#fef2f2] text-risk",
 };
 
 export function Badge({
@@ -22,7 +22,7 @@ export function Badge({
       : tone === "watch"
         ? healthStyles.WATCH
         : tone === "risk"
-          ? healthStyles.RISK
+          ? healthStyles.TIGHT
           : "bg-[#f3f4f6] text-muted";
 
   return (
@@ -51,7 +51,7 @@ export function HealthBadge({ status }: { status: HealthStatus }) {
           "h-1.5 w-1.5 rounded-full",
           status === "OK" && "bg-ok",
           status === "WATCH" && "bg-watch",
-          status === "RISK" && "bg-risk",
+          status === "TIGHT" && "bg-risk",
         )}
       />
       {status}

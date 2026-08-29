@@ -1,7 +1,7 @@
 const FEATURES = [
   {
     title: "Analyze",
-    body: "See business health in one badge — OK, WATCH, or RISK — from the numbers you already have.",
+    body: "See business health in one badge — OK, WATCH, or TIGHT — from the numbers you already have.",
   },
   {
     title: "Detect risk",

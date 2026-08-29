@@ -1,38 +1,36 @@
+import { mmk } from "@/lib/ledger/types";
+import { analyzeLedger } from "@/lib/ledger/analyze";
 import type { SpecialistDef } from "@/lib/agents/types";
 
 export const opsAgent: SpecialistDef = {
   id: "ops",
   name: "Ops",
-  title: "Cadence, roles, delivery",
-  blurb: "Gives a three-person team a weekly rhythm so making, selling, and delivering do not collide.",
+  title: "Do not trap more cash",
+  blurb: "If stock or materials exist, flags slow lots so Finance does not restock them.",
   accent: "#3d5a80",
-  keywords: [
-    "ops",
-    "operation",
-    "hire",
-    "process",
-    "delivery",
-    "legal",
-    "compliance",
-    "team",
-    "workflow",
-  ],
-  tools: ["ops_cadence"],
-  system: `You are Foundry's Ops agent.
-Design a cadence a 2-8 person SME can actually run.
-Flag compliance only when it blocks selling (food safety, invoicing, labeling) — do not dump a legal textbook.
-Never recommend a hire until the current team is at capacity on a proven offer.`,
-  demo: ({ context, tools }) => {
-    const cadence = tools.find((t) => t.name === "ops_cadence")?.output as
-      | { weekly: string[]; roles: string[] }
-      | undefined;
+  keywords: ["stock", "restock", "sku", "inventory", "dish", "fabric"],
+  tools: ["slow_stock"],
+  system: `You are Foundry Ops for Myanmar SMEs with stock, dishes, listings, or materials.
+If slow_stock.applicable is false, say there is no stock signal.
+Otherwise name the slow item and MMK tied up. Constraint: do not buy more of it.
+Return JSON {summary, bullets}.`,
+  demo: ({ ledger }) => {
+    const snap = analyzeLedger(ledger);
+    if (ledger.inventory.length === 0) {
+      return {
+        summary: "No stock lines in this snapshot — cash and credit are the whole ops picture.",
+        bullets: ["Do not invent inventory advice."],
+      };
+    }
+    const item = snap.slow[0];
     return {
-      summary: `With ${context.teamSize} people, ${context.name} needs a single kit, a packing ritual, and a weekly sales block — not a new org chart.`,
+      summary: item
+        ? `${item.sku} is slow (${item.soldThisMonth} moved / ${item.units} on hand). ${mmk(snap.tiedInSlow)} tied up.`
+        : "No slow lot above the threshold.",
       bullets: [
-        cadence ? `Cadence: ${cadence.weekly.join(" / ")}.` : "One weekly planning hour. One fulfillment block. One sales block.",
-        cadence ? `Roles: ${cadence.roles.join(" · ")}.` : "Founder sells. Partner makes. Partner delivers.",
-        "Fulfillment: one kit SKU, pre-printed labels, same-day pack list in a shared sheet.",
-        "Compliance light: ingredient/label basics and a simple invoice — enough to sell to offices and hotels.",
+        item
+          ? `Do not restock ${item.sku} this week.`
+          : "Reorder only what actually moved.",
       ],
     };
   },

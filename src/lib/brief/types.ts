@@ -1,6 +1,7 @@
 import type { AgentMemo, BusinessContext } from "@/lib/agents/types";
+import type { BusinessHealth } from "@/lib/ledger/types";
 
-export type HealthStatus = "OK" | "WATCH" | "RISK";
+export type HealthStatus = BusinessHealth;
 
 export type MetricTone = "ok" | "watch" | "risk" | "neutral";
 

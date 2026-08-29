@@ -116,7 +116,7 @@ function VoiceView() {
     sending.current = false;
     const finalText =
       reply ||
-      "Unable to analyze the business right now. Please try again.";
+      "Unable to analyze the shop right now. Please try again.";
     setTurns((t) =>
       t.map((turn) => (turn.id === copilotId ? { ...turn, text: finalText } : turn)),
     );

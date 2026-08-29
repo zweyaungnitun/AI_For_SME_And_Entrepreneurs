@@ -1,66 +1,34 @@
-import { specialists } from "@/lib/agents/registry";
-import type { AgentId, BusinessContext, ChatTurn } from "@/lib/agents/types";
-import { complete, extractJson } from "@/lib/llm/complete";
-import { llmConfigured } from "@/lib/config";
+import type { AgentId, BusinessContext } from "@/lib/agents/types";
+import { isBurmese } from "@/lib/ledger/types";
+import type { Ledger } from "@/lib/ledger/types";
 
-const ALWAYS: AgentId[] = ["strategy"];
+export function heuristicPlan(
+  message: string,
+  _context: BusinessContext,
+  ledger: Ledger,
+): { agents: AgentId[]; rationale: string } {
+  const hay = message.toLowerCase();
+  const agents: AgentId[] = ["finance"];
+  if (ledger.inventory.length > 0) agents.push("ops");
+  agents.push("action");
 
-export function heuristicPlan(message: string, context: BusinessContext): AgentId[] {
-  const hay = `${message} ${context.challenge} ${context.industry}`.toLowerCase();
-  const picked = new Set<AgentId>(ALWAYS);
-
-  for (const agent of specialists) {
-    if (agent.keywords.some((k) => hay.includes(k))) picked.add(agent.id);
+  const looksLikeNote =
+    isBurmese(message) ||
+    /took|will pay|yesterday|သိန်း|အကြွေး|boxes|invoice/i.test(hay);
+  if (looksLikeNote && /(\d|သိန်း)/.test(message)) {
+    agents.unshift("books");
   }
 
-  if (picked.size === 1) {
-    picked.add("growth");
-    picked.add("finance");
-  }
-
-  if (hay.includes("first 100") || hay.includes("customer") || hay.includes("launch")) {
-    picked.add("growth");
-    picked.add("market");
-  }
-
-  return specialists.map((a) => a.id).filter((id) => picked.has(id));
+  return {
+    agents,
+    rationale: `Finance-first copilot for ${ledger.shopType}. Ops only with stock. Books if the message looks like a credit note.`,
+  };
 }
 
 export async function planAgents(
   message: string,
   context: BusinessContext,
-  history: ChatTurn[],
-): Promise<{ agents: AgentId[]; rationale: string }> {
-  const fallback = heuristicPlan(message, context);
-  const rationale = `Route through ${fallback.join(", ")} given the stage (${context.stage}) and the ask.`;
-
-  if (!llmConfigured()) {
-    return { agents: fallback, rationale };
-  }
-
-  try {
-    const raw = await complete({
-      json: true,
-      system:
-        "You are Foundry's conductor. Pick 2-4 specialist ids from: strategy, finance, market, growth, ops. Always include strategy unless the question is purely operational. Return JSON {agents: string[], rationale: string}.",
-      prompt: JSON.stringify({
-        context,
-        message,
-        recent: history.slice(-4),
-      }),
-    });
-    const parsed = extractJson<{ agents?: string[]; rationale?: string }>(raw, {});
-    const allowed = new Set<string>(specialists.map((a) => a.id));
-    const agents = (parsed.agents ?? []).filter((id): id is AgentId =>
-      allowed.has(id),
-    ).slice(0, 4);
-    if (agents.length === 0) return { agents: fallback, rationale };
-    if (!agents.includes("strategy")) agents.unshift("strategy");
-    return {
-      agents,
-      rationale: parsed.rationale || rationale,
-    };
-  } catch {
-    return { agents: fallback, rationale };
-  }
+  ledger: Ledger,
+) {
+  return heuristicPlan(message, context, ledger);
 }

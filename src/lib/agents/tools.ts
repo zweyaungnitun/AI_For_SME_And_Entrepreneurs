@@ -1,98 +1,148 @@
+import { analyzeLedger } from "@/lib/ledger/analyze";
+import { mmk, type Ledger } from "@/lib/ledger/types";
 import type { BusinessContext, ToolResult } from "@/lib/agents/types";
+import { searchKnowledge } from "@/lib/db/knowledge";
 
 function timed<T>(name: string, input: Record<string, unknown>, run: () => T): ToolResult {
   const start = Date.now();
-  const output = run();
-  return { name, input, output, ms: Date.now() - start };
+  return { name, input, output: run(), ms: Date.now() - start };
 }
 
-const CHANNELS: Record<string, string[]> = {
-  food: ["Weekend pop-ups", "WhatsApp / Viber catalogs", "Office tasting boxes"],
-  tea: ["Tasting nights", "Hotel and cafe wholesale", "Gift sets for corporates"],
-  retail: ["Neighborhood flyers + QR", "Referral cards at till", "Local creator unboxings"],
-  software: ["Founder-led LinkedIn", "Product-led free trial", "Partner agencies"],
-  services: ["Warm intros", "Case-study posts", "Workshops"],
-  default: ["Community groups", "Partner shelves", "Direct outreach"],
+export async function runTool(
+  name: string,
+  _context: BusinessContext,
+  message: string,
+  ledger: Ledger,
+  shopId?: string,
+): Promise<ToolResult> {
+  const snap = analyzeLedger(ledger);
+
+  if (name === "cash_pressure") {
+    return timed(name, { cash: ledger.cashOnHand, payables: snap.nearTotal }, () => ({
+      shopType: ledger.shopType,
+      cash: ledger.cashOnHand,
+      payables: snap.nearTotal,
+      gap: snap.cashGap,
+      tight: snap.tight,
+      flag: snap.tight ? "TIGHT" : "OK",
+      upcoming: snap.near.map((e) => ({
+        name: e.name,
+        amount: e.amount,
+        dueInDays: e.dueInDays,
+      })),
+      why: snap.tight
+        ? `Payables ${mmk(snap.nearTotal)} exceed cash ${mmk(ledger.cashOnHand)}.`
+        : `Cash ${mmk(ledger.cashOnHand)} covers payables ${mmk(snap.nearTotal)}.`,
+    }));
+  }
+
+  if (name === "receivable_rank") {
+    return timed(name, { count: ledger.receivables.length }, () => ({
+      shopType: ledger.shopType,
+      ranked: snap.ranked.map((r) => ({
+        customer: r.customer,
+        amount: r.amount,
+        overdueDays: r.overdueDays,
+        status: r.status,
+      })),
+      top: snap.topCustomer
+        ? {
+            customer: snap.topCustomer.customer,
+            amount: snap.topCustomer.amount,
+            overdueDays: snap.topCustomer.overdueDays,
+          }
+        : null,
+      overdueTotal: snap.overdueTotal,
+    }));
+  }
+
+  if (name === "slow_stock") {
+    return timed(name, { skus: ledger.inventory.length }, () => ({
+      shopType: ledger.shopType,
+      applicable: ledger.inventory.length > 0,
+      items: snap.slow.map((s) => ({
+        sku: s.sku,
+        units: s.units,
+        soldThisMonth: s.soldThisMonth,
+        tiedUp: s.units * s.unitCost,
+      })),
+      tiedUpTotal: snap.tiedInSlow,
+    }));
+  }
+
+  if (name === "extract_note") {
+    return timed(name, { message: message.slice(0, 240) }, () => heuristicExtract(message));
+  }
+
+  if (name === "search_knowledge") {
+    const start = Date.now();
+    const output = await searchKnowledge(message, shopId ?? "daw-hla");
+    return {
+      name,
+      input: { q: message.slice(0, 120), shopId: shopId ?? "daw-hla" },
+      output,
+      ms: Date.now() - start,
+    };
+  }
+
+  return timed(name, {}, () => ({ skipped: true, reason: "unknown tool" }));
+}
+
+export type ExtractedNote = {
+  parsed: boolean;
+  customer?: string;
+  amount?: number;
+  type?: "receivable";
+  due?: string;
+  status?: "pending" | "overdue";
+  note: string;
 };
 
-export function guessPrice(industry: string) {
-  const t = industry.toLowerCase();
-  if (t.includes("tea") || t.includes("snack") || t.includes("food") || t.includes("coffee")) {
-    return { price: 18, cogs: 7, cac: 6 };
+function heuristicExtract(message: string): ExtractedNote {
+  const lakh = message.match(/(\d+)\s*(သိန်း|lakhs?)/i);
+  const plain = message.match(/(\d[\d,]*)\s*(MMK|kyat)?/i);
+  let amount: number | undefined;
+  if (lakh) amount = Number(lakh[1]) * 100_000;
+  else if (plain) {
+    const n = Number(plain[1].replace(/,/g, ""));
+    if (n >= 1000) amount = n;
   }
-  if (t.includes("software") || t.includes("saas")) {
-    return { price: 49, cogs: 6, cac: 80 };
+
+  const names: Array<[RegExp, string]> = [
+    [/ko\s*min/i, "Ko Min"],
+    [/ma\s*su/i, "Ma Su"],
+    [/u\s*myint/i, "U Myint"],
+    [/daw\s*kyi/i, "Daw Kyi"],
+    [/bride\s*su/i, "Bride Su"],
+    [/maung\s*maung|မောင်မောင်/i, "Maung Maung"],
+  ];
+  const hit = names.find(([re]) => re.test(message));
+  const customer = hit?.[1];
+
+  if (customer && amount) {
+    return {
+      parsed: true,
+      customer,
+      amount,
+      type: "receivable",
+      due: /friday|သောကြာ/i.test(message) ? "Friday" : undefined,
+      status: /overdue|ကျော်/i.test(message) ? "overdue" : "pending",
+      note: "Parsed from the owner note. Amount used only because it appeared in the message.",
+    };
   }
-  if (t.includes("service") || t.includes("consult")) {
-    return { price: 400, cogs: 80, cac: 120 };
-  }
-  return { price: 40, cogs: 16, cac: 25 };
+
+  return {
+    parsed: false,
+    note: "No structured entry. Need a name and an amount in MMK.",
+  };
 }
 
-export function runTool(name: string, context: BusinessContext, message: string): ToolResult {
-  const numbers = guessPrice(context.industry);
-
-  if (name === "unit_economics") {
-    return timed(name, numbers, () => {
-      const contribution = numbers.price - numbers.cogs;
-      const margin = contribution / numbers.price;
-      const paybackOrders = contribution > 0 ? numbers.cac / contribution : null;
-      const first100Revenue = numbers.price * 100;
-      const first100Contribution = contribution * 100;
-      return {
-        currency: "USD equivalent",
-        ...numbers,
-        contribution: Number(contribution.toFixed(2)),
-        grossMargin: `${Math.round(margin * 100)}%`,
-        ordersToRecoverCac: paybackOrders ? Number(paybackOrders.toFixed(1)) : null,
-        first100Revenue,
-        first100Contribution: Number(first100Contribution.toFixed(0)),
-      };
-    });
-  }
-
-  if (name === "channel_mix") {
-    const key =
-      Object.keys(CHANNELS).find((k) => context.industry.toLowerCase().includes(k)) ?? "default";
-    return timed(name, { industry: context.industry, stage: context.stage }, () => ({
-      recommended: CHANNELS[key],
-      avoidUntilProductLove: ["Broad paid social", "Billboards", "Unfocused marketplaces"],
-      weeklyCadence: "3 outbound hours + 1 public proof post",
-    }));
-  }
-
-  if (name === "customer_wedge") {
-    return timed(
-      name,
-      { location: context.location, challenge: context.challenge },
-      () => ({
-        primaryIcp: `Early adopters in ${context.location} who already buy ${context.industry.toLowerCase()} as a gift or weekly ritual`,
-        wedgeOffer: "Founding-100 kit with a refill promise and a named batch",
-        proof: "10 conversations this week, 3 paid pre-orders before any ads",
-        constraint: context.challenge,
-        messageHint: message.slice(0, 140),
-      }),
-    );
-  }
-
-  if (name === "ops_cadence") {
-    return timed(name, { teamSize: context.teamSize }, () => ({
-      weekly: [
-        "Mon: pipeline + cash",
-        "Wed: make / fulfill",
-        "Fri: customer conversations + one public proof",
-      ],
-      roles:
-        context.teamSize <= 3
-          ? ["Founder: sales + story", "Partner: product", "Partner: ops / delivery"]
-          : ["Founder", "Product", "Demand", "Ops"],
-      stopDoing: ["Building extra SKUs", "Custom one-offs that break margin"],
-    }));
-  }
-
-  return timed(name, {}, () => ({ skipped: true }));
-}
-
-export function runTools(names: string[], context: BusinessContext, message: string) {
-  return names.map((name) => runTool(name, context, message));
+export async function runTools(
+  names: string[],
+  context: BusinessContext,
+  message: string,
+  ledger: Ledger,
+  shopId?: string,
+) {
+  return Promise.all(names.map((name) => runTool(name, context, message, ledger, shopId)));
 }

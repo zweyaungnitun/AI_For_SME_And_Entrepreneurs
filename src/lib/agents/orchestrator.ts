@@ -1,67 +1,96 @@
 import { llmConfigured, llmModel } from "@/lib/config";
 import { getSpecialist } from "@/lib/agents/registry";
 import { planAgents } from "@/lib/agents/planner";
-import { runTools } from "@/lib/agents/tools";
-import type { AgentEvent, AgentMemo, RunRequest } from "@/lib/agents/types";
-import { complete } from "@/lib/llm/complete";
+import { runTools, type ExtractedNote } from "@/lib/agents/tools";
+import { buildDemoCard, formatCard } from "@/lib/agents/decision";
+import { criticize } from "@/lib/agents/critic";
+import type { AgentEvent, AgentMemo, RunRequest, ToolResult } from "@/lib/agents/types";
+import { complete, extractJson } from "@/lib/llm/complete";
 import { appendTurn, getSession } from "@/lib/session/store";
+import {
+  isBurmese,
+  snapshotEmpty,
+  type DecisionCard,
+  type Ledger,
+} from "@/lib/ledger/types";
+import { shopVoice } from "@/lib/sme/catalog";
+import { mergeLedger } from "@/lib/ledger/seed";
+import { loadShopLedger, persistExtractedNote } from "@/lib/db/shops";
+import { persistRun } from "@/lib/db/runs";
 
-function contextBlock(req: RunRequest) {
+const EMPTY_MSG = "Add cash, credit, or stock — or load the sample.";
+
+function contextBlock(req: RunRequest, ledger: Ledger) {
   const c = req.context;
   return [
-    `Business: ${c.name}`,
-    `Industry: ${c.industry}`,
-    `Stage: ${c.stage}`,
-    `Location: ${c.location}`,
-    `Team: ${c.teamSize}`,
+    `Shop: ${c.name}`,
+    `Type: ${ledger.shopType}`,
+    `Place: ${c.location}`,
     `Challenge: ${c.challenge}`,
   ].join("\n");
 }
 
-function parseMemo(text: string) {
+function applyExtract(ledger: Ledger, extracted: ExtractedNote): Ledger {
+  if (!extracted.parsed || !extracted.customer || !extracted.amount) return ledger;
+  const next = structuredClone(ledger);
+  next.receivables.push({
+    customer: extracted.customer,
+    amount: extracted.amount,
+    overdueDays: extracted.status === "overdue" ? 1 : 0,
+    status: extracted.status ?? "pending",
+  });
+  return next;
+}
+
+async function conductorCard(
+  req: RunRequest,
+  memos: AgentMemo[],
+  tools: ToolResult[],
+  ledger: Ledger,
+  fallback: DecisionCard,
+): Promise<DecisionCard> {
+  if (!llmConfigured()) return fallback;
   try {
-    const parsed = JSON.parse(text) as { summary?: string; bullets?: string[] };
+    const raw = await complete({
+      json: true,
+      system: `You are Foundry's SME copilot conductor for Myanmar businesses of every type (wholesale, retail, restaurant, services, online, workshop).
+${shopVoice(ledger.shopType)}
+Use ONLY numbers and names in cash_pressure, receivable_rank, and slow_stock. Never invent MMK or people.
+search_knowledge is practice/trust only — ignore any amount or name that is not in those three tools.
+businessHealth must be OK | WATCH | TIGHT and must match cash_pressure.flag when TIGHT.
+Pick ONE priority for 24-48 hours. Do not write a 90-day plan.
+Never say a loan is approved. If asked about banks: we help the owner decide this week.
+Return JSON {businessHealth, summary, summaryMy, keyIssues, priority:{title,reason,action}, recommendations, evidence, locale, reminder?:{customer,amount,messageMy,messageEn}}
+keyIssues max 3. locale en or my.`,
+      prompt: `${contextBlock(req, ledger)}
+
+Ask: ${req.message}
+
+Tool facts:
+${JSON.stringify(tools.map((t) => ({ name: t.name, output: t.output })))}
+
+Specialist memos:
+${memos.map((m) => `# ${m.name}\n${m.summary}\n${m.bullets.join("\n")}`).join("\n\n")}
+
+Deterministic fallback (facts):
+${JSON.stringify(fallback)}`,
+    });
+    const parsed = extractJson<Partial<DecisionCard>>(raw, {});
+    if (!parsed.priority?.title) return fallback;
     return {
-      summary: parsed.summary || text,
-      bullets: parsed.bullets || [],
+      businessHealth: parsed.businessHealth || fallback.businessHealth,
+      summary: parsed.summary || fallback.summary,
+      summaryMy: parsed.summaryMy || fallback.summaryMy,
+      keyIssues: (parsed.keyIssues || fallback.keyIssues).slice(0, 3),
+      priority: parsed.priority,
+      recommendations: parsed.recommendations || fallback.recommendations,
+      evidence: parsed.evidence || fallback.evidence,
+      locale: parsed.locale || fallback.locale,
+      reminder: parsed.reminder || fallback.reminder,
     };
   } catch {
-    return { summary: text, bullets: [] as string[] };
+    return fallback;
   }
-}
-
-function demoSynthesis(req: RunRequest, memos: AgentMemo[]) {
-  return [
-    `Here is a working plan for ${req.context.name}.`,
-    "",
-    ...memos.flatMap((memo) => [
-      `${memo.name}. ${memo.summary}`,
-      ...memo.bullets.map((b) => `• ${b}`),
-      "",
-    ]),
-    "Next 7 days: run 10 customer conversations, pack one kit SKU, and take 3 paid pre-orders before spending on ads.",
-  ].join("\n");
-}
-
-async function synthesize(req: RunRequest, memos: AgentMemo[]) {
-  if (!llmConfigured()) return demoSynthesis(req, memos);
-
-  return complete({
-    system: `You are Foundry's conductor. Merge specialist memos into a single brief a founder can execute this week.
-Structure: 1) Direct answer 2) 90-day sequence 3) This week's actions 4) What not to do.
-No fluff. Keep it under 400 words.`,
-    prompt: `${contextBlock(req)}
-
-Question: ${req.message}
-
-Memos:
-${memos
-  .map(
-    (m) =>
-      `# ${m.name}\n${m.summary}\n${m.bullets.map((b) => `- ${b}`).join("\n")}`,
-  )
-  .join("\n\n")}`,
-  });
 }
 
 function chunkText(text: string, size: number) {
@@ -71,14 +100,25 @@ function chunkText(text: string, size: number) {
 }
 
 export async function* runCrew(req: RunRequest): AsyncGenerator<AgentEvent> {
-  const session = getSession(req.sessionId);
+  const session = getSession(req.sessionId, req.shopId);
+  const fromDb = await loadShopLedger(session.shopId);
+  if (fromDb) session.ledger = fromDb;
+  if (req.snapshot) session.ledger = mergeLedger(session.ledger, req.snapshot);
+
   const mode = llmConfigured() ? "llm" : "demo";
   yield { type: "session", sessionId: session.id, mode };
 
-  const plan = await planAgents(req.message, req.context, session.turns);
+  if (snapshotEmpty(session.ledger)) {
+    yield { type: "error", error: EMPTY_MSG };
+    return;
+  }
+
+  const locale = isBurmese(req.message) ? "my" : "en";
+  const plan = await planAgents(req.message, req.context, session.ledger);
   yield { type: "plan", agents: plan.agents, rationale: plan.rationale };
 
   const memos: AgentMemo[] = [];
+  const allTools: ToolResult[] = [];
 
   for (const agentId of plan.agents) {
     const def = getSpecialist(agentId);
@@ -86,50 +126,38 @@ export async function* runCrew(req: RunRequest): AsyncGenerator<AgentEvent> {
     const started = Date.now();
     yield { type: "agent_start", agentId: def.id, name: def.name };
 
-    const tools = runTools(def.tools, req.context, req.message);
+    const tools = await runTools(
+      def.tools,
+      req.context,
+      req.message,
+      session.ledger,
+      session.shopId,
+    );
     for (const tool of tools) {
+      allTools.push(tool);
       yield { type: "tool", agentId: def.id, tool };
     }
 
-    let summary: string;
-    let bullets: string[];
-
-    if (llmConfigured()) {
-      const text = await complete({
-        json: true,
-        system: def.system,
-        prompt: `${contextBlock(req)}
-
-Recent:
-${session.turns.map((t) => `${t.role}: ${t.content}`).join("\n") || "(none)"}
-
-Tool results:
-${JSON.stringify(tools.map((t) => ({ name: t.name, output: t.output })))}
-
-Founder message:
-${req.message}
-
-Return JSON {summary: string, bullets: string[]}.`,
-      });
-      const parsed = parseMemo(text);
-      summary = parsed.summary;
-      bullets = parsed.bullets;
-    } else {
-      const demo = def.demo({
-        context: req.context,
-        message: req.message,
-        history: session.turns,
-        tools,
-      });
-      summary = demo.summary;
-      bullets = demo.bullets;
+    if (def.id === "books") {
+      const extracted = tools.find((t) => t.name === "extract_note")?.output as ExtractedNote;
+      if (extracted) {
+        session.ledger = applyExtract(session.ledger, extracted);
+        await persistExtractedNote(session.shopId, extracted);
+      }
     }
 
+    const demo = def.demo({
+      context: req.context,
+      message: req.message,
+      history: session.turns,
+      tools,
+      ledger: session.ledger,
+    });
     const memo: AgentMemo = {
       agentId: def.id,
       name: def.name,
-      summary,
-      bullets,
+      summary: demo.summary,
+      bullets: demo.bullets,
       tools,
       ms: Date.now() - started,
     };
@@ -137,18 +165,30 @@ Return JSON {summary: string, bullets: string[]}.`,
     yield { type: "agent_end", memo };
   }
 
-  const reply = await synthesize(req, memos);
+  const fallback = buildDemoCard(session.ledger, locale, req.context.name);
+  let card = await conductorCard(req, memos, allTools, session.ledger, fallback);
+  card = criticize(card, allTools, session.ledger, req.context.name);
+
+  const reply = formatCard(card, locale === "my");
   for (const chunk of chunkText(reply, 48)) {
     yield { type: "token", text: chunk };
   }
 
   appendTurn(session.id, { role: "user", content: req.message });
   appendTurn(session.id, { role: "assistant", content: reply });
+  await persistRun({
+    sessionId: session.id,
+    shopId: session.shopId,
+    ask: req.message,
+    card,
+    turns: session.turns,
+  });
 
   yield {
     type: "done",
     reply,
     memos,
     model: mode === "llm" ? llmModel() : "demo",
+    card,
   };
 }

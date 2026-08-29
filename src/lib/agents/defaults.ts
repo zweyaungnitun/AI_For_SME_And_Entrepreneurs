@@ -1,19 +1,11 @@
-import type { BusinessContext } from "./types";
+import { getShop } from "@/lib/sme/catalog";
 
-export const DEFAULT_CONTEXT: BusinessContext = {
-  name: "Lotus Lane",
-  industry: "D2C specialty tea and snacks",
-  stage: "pre-revenue",
-  location: "Yangon, Myanmar",
-  teamSize: 3,
-  challenge:
-    "Need a 90-day plan to win the first 100 paying customers without a large ad budget.",
-};
+export const DEFAULT_CONTEXT = getShop("daw-hla").context;
 
-export const STAGES: BusinessContext["stage"][] = [
+export const STAGES = [
   "idea",
   "pre-revenue",
   "early",
   "growth",
   "established",
-];
+] as const;

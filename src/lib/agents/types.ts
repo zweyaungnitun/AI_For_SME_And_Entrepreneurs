@@ -1,3 +1,5 @@
+import type { DecisionCard, Ledger } from "@/lib/ledger/types";
+
 export type Stage =
   | "idea"
   | "pre-revenue"
@@ -19,13 +21,7 @@ export type ChatTurn = {
   content: string;
 };
 
-export type AgentId =
-  | "conductor"
-  | "strategy"
-  | "finance"
-  | "market"
-  | "growth"
-  | "ops";
+export type AgentId = "conductor" | "finance" | "ops" | "books" | "action";
 
 export type ToolResult = {
   name: string;
@@ -50,12 +46,21 @@ export type AgentEvent =
   | { type: "tool"; agentId: AgentId; tool: ToolResult }
   | { type: "agent_end"; memo: AgentMemo }
   | { type: "token"; text: string }
-  | { type: "done"; reply: string; memos: AgentMemo[]; model: string };
+  | { type: "error"; error: string }
+  | {
+      type: "done";
+      reply: string;
+      memos: AgentMemo[];
+      model: string;
+      card: DecisionCard;
+    };
 
 export type RunRequest = {
   message: string;
   sessionId?: string;
+  shopId?: string;
   context: BusinessContext;
+  snapshot?: Partial<Ledger>;
 };
 
 export type DemoArgs = {
@@ -63,6 +68,7 @@ export type DemoArgs = {
   message: string;
   history: ChatTurn[];
   tools: ToolResult[];
+  ledger: Ledger;
 };
 
 export type SpecialistDef = {

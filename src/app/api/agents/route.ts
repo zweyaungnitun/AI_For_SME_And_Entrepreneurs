@@ -6,7 +6,7 @@ export async function GET() {
       id: "conductor",
       name: "Conductor",
       title: "Routes, sequences, synthesizes",
-      blurb: "Reads the founder ask, picks specialists, and writes the final brief.",
+      blurb: "Reads the shop snapshot, keeps Finance first, and writes one next-best-action brief.",
     },
     specialists: specialists.map((a) => ({
       id: a.id,

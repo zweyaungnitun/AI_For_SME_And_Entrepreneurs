@@ -1,134 +1,103 @@
+import { getShop } from "@/lib/sme/catalog";
+import { mmk } from "@/lib/ledger/types";
+import { analyzeLedger } from "@/lib/ledger/analyze";
+import { metricsFromLedger } from "@/lib/brief/snapshot";
 import type { BusinessSnapshot } from "./types";
 
+const shop = getShop("daw-hla");
+const snap = analyzeLedger(shop.ledger);
+const top = snap.overdue[0];
+const slow = snap.slow[0];
 const GENERATED_AT = "2026-08-29T08:15:00.000Z";
 
 export const DEMO_SNAPSHOT: BusinessSnapshot = {
-  context: {
-    name: "Hlaing Mini Mart",
-    industry: "Neighborhood grocery retail",
-    stage: "established",
-    location: "Hlaing Township, Yangon",
-    teamSize: 4,
-    challenge:
-      "Cash is tight this week — three customers still owe us, and supplier bills are due in five days.",
-  },
+  context: shop.context,
   financials: {
-    cashMmk: "420000",
-    receivablesMmk: "350000",
-    upcomingMmk: "500000",
-    inventoryNote: "Cooking oil and snack packs moving slowly",
+    cashMmk: String(shop.ledger.cashOnHand),
+    receivablesMmk: String(
+      shop.ledger.receivables.reduce((a, r) => a + r.amount, 0),
+    ),
+    upcomingMmk: String(shop.ledger.upcomingExpenses[0]?.amount ?? 0),
+    inventoryNote: slow
+      ? `${slow.sku} ${slow.units} units, ${slow.soldThisMonth} sold this month`
+      : "No stock lines",
   },
-  health: "WATCH",
+  health: snap.businessHealth,
   healthSummary:
-    "Receivables are sitting while supplier bills land in five days. Cash on hand does not cover upcoming expenses unless collections move today.",
-  metrics: [
-    {
-      id: "cash",
-      label: "Cash on hand",
-      value: "420,000 MMK",
-      hint: "Below this week's bills",
-      tone: "watch",
-    },
-    {
-      id: "receivables",
-      label: "Receivables",
-      value: "350,000 MMK",
-      hint: "3 overdue customers",
-      tone: "risk",
-    },
-    {
-      id: "upcoming",
-      label: "Upcoming expenses",
-      value: "500,000 MMK",
-      hint: "Due in 5 days",
-      tone: "risk",
-    },
-    {
-      id: "inventory",
-      label: "Inventory flag",
-      value: "Slow-moving",
-      hint: "Oil + snack packs",
-      tone: "watch",
-    },
-  ],
+    "Payables outrun cash while one large overdue sits. Collect Ko Min first. Do not restock Product A.",
+  metrics: metricsFromLedger(shop.ledger),
   priority: {
-    title: "Follow up with 3 overdue customers",
-    reason:
-      "Upcoming expenses (500,000 MMK) sit above cash on hand (420,000 MMK). Collecting 350,000 MMK in overdue credit closes the gap.",
-    action:
-      "Call Maung Maung today (200,000 MMK, 7 days overdue), then Daw Aye and Ko Win before noon. Ask for payment this week, not a new order.",
+    title: top ? `Collect ${top.customer} first` : "Protect cash this week",
+    reason: `Payable ${mmk(snap.nearTotal)} in ${snap.near[0]?.dueInDays ?? 5} days > cash ${mmk(shop.ledger.cashOnHand)}.`,
+    action: top
+      ? `Contact ${top.customer} today (${mmk(top.amount)}, ${top.overdueDays} days overdue). Do not restock ${slow?.sku ?? "slow stock"} this week.`
+      : "Write the 7-day payable list.",
   },
   risk: {
     title: "Short-term cash pressure",
-    detail:
-      "Available cash 420,000 MMK vs upcoming expenses 500,000 MMK. If the three overdue invoices slip another week, supplier payments get squeezed.",
+    detail: `Available cash ${mmk(shop.ledger.cashOnHand)} vs upcoming ${mmk(snap.nearTotal)}. ${top ? `${top.customer} is the largest overdue.` : ""}`,
   },
   insights: [
     {
       id: "cashflow",
-      title: "Cash is short of this week's bills",
+      title: "Payables outrun cash this week",
       summary:
-        "Cash on hand does not cover supplier payments due in five days unless overdue credit is collected.",
-      happening:
-        "Hlaing Mini Mart has 420,000 MMK in the till and 500,000 MMK in bills due within five days. Three regulars still owe 350,000 MMK.",
+        "Cash on hand does not cover the supplier payable due in five days unless overdue credit is collected.",
+      happening: `${shop.context.name} has ${mmk(shop.ledger.cashOnHand)} in the till and ${mmk(snap.nearTotal)} due in ${snap.near[0]?.dueInDays ?? 5} days.`,
       wrong:
-        "The shop is making sales on credit faster than it is collecting. Cash looks busy at the counter, but it is not available for suppliers.",
+        "Credit is sitting while the payable is closer than the cash. The till looks busy; the cash is not available.",
       matters:
-        "If collections wait, you may delay a supplier or dip into personal cash. That is a this-week problem, not a year-end one.",
-      action:
-        "Collect the highest-priority receivables first. Start with Maung Maung (200,000 MMK, 7 days overdue).",
-      why: "Closing 200,000 MMK today turns a 80,000 MMK cash gap into a buffer before Friday's supplier run.",
-      evidence: [
-        "Cash on hand: 420,000 MMK",
-        "Upcoming expenses due in 5 days: 500,000 MMK",
-        "Overdue receivables: 350,000 MMK across 3 customers",
-        "Largest overdue: Maung Maung 200,000 MMK (7 days)",
-      ],
-      health: "WATCH",
+        "If collections wait, the supplier payment gets squeezed this week — not at year end.",
+      action: top
+        ? `Collect ${top.customer} first (${mmk(top.amount)}, ${top.overdueDays} days overdue).`
+        : "Collect the largest overdue first.",
+      why: "Largest overdue while cash is below the 5-day payable.",
+      evidence: snap.evidence,
+      health: snap.businessHealth,
       generatedAt: GENERATED_AT,
     },
     {
       id: "receivables",
-      title: "Three customers are past due",
+      title: top ? `${top.customer} is overdue` : "Credit follow-up",
       summary:
-        "Credit is informal and aging. The owner cannot answer 'who do I call first?' without flipping through notes.",
-      happening:
-        "Maung Maung, Daw Aye, and Ko Win still have open tabs. None have a written reminder this week.",
-      wrong:
-        "Follow-up is by memory. The largest balance is also the oldest, so it should be first — it currently is not.",
-      matters:
-        "These three invoices are the only liquid source of cash before supplier day.",
-      action:
-        "Call in this order: Maung Maung → Daw Aye → Ko Win. Confirm a payment day. Do not extend more credit until the tab is cleared.",
-      why: "A 10-minute call sequence is cheaper than missing a supplier payment or restocking on borrowed cash.",
-      evidence: [
-        "Maung Maung — 200,000 MMK — 7 days overdue",
-        "Daw Aye — 90,000 MMK — 4 days overdue",
-        "Ko Win — 60,000 MMK — 3 days overdue",
-      ],
-      health: "WATCH",
+        "Ranked credit says who to call first. The owner should not follow up by memory.",
+      happening: shop.ledger.receivables
+        .map((r) => `${r.customer} ${mmk(r.amount)} (${r.status}, ${r.overdueDays}d)`)
+        .join(". "),
+      wrong: "The largest overdue should be first. It currently waits.",
+      matters: "This is the only liquid cash before the supplier day.",
+      action: top
+        ? `Contact ${top.customer} today. Ask for payment this week, not a new order.`
+        : "Call the largest overdue party today.",
+      why: "A short follow-up is cheaper than missing the payable.",
+      evidence: shop.ledger.receivables.map(
+        (r) => `${r.customer} — ${mmk(r.amount)} — ${r.overdueDays} days`,
+      ),
+      health: snap.businessHealth,
       generatedAt: GENERATED_AT,
     },
     {
       id: "inventory",
-      title: "Slow-moving stock is tying up cash",
-      summary:
-        "Cooking oil and snack packs are sitting while the shop still considers restocking them.",
-      happening:
-        "Shelf space and cash are locked in oil and snack packs that barely moved this month.",
-      wrong:
-        "Restocking those SKUs would spend cash the shop does not have this week.",
-      matters:
-        "Inventory is not 'assets' if it cannot pay Friday's supplier. It is cash you cannot spend.",
-      action:
-        "Do not restock cooking oil or snack packs this week. Push a small till discount on the slow units after collections are done.",
+      title: slow ? `${slow.sku} is slow` : "Stock",
+      summary: slow
+        ? `${slow.sku} already sits slow — buying more locks more cash.`
+        : "No slow lot flagged.",
+      happening: slow
+        ? `${slow.sku}: ${slow.units} on hand, ${slow.soldThisMonth} sold this month.`
+        : "No stock signal.",
+      wrong: "Restocking a slow SKU spends cash the shop does not have this week.",
+      matters: "Inventory is not cash if it cannot pay the supplier.",
+      action: slow
+        ? `Do not restock ${slow.sku} this week.`
+        : "Reorder only what moved.",
       why: "Sales velocity is low; another purchase order would widen the cash gap.",
-      evidence: [
-        "Cooking oil: stock still high, few units sold this month",
-        "Snack packs: slow compared with rice and eggs",
-        "Cash already short of upcoming expenses",
-      ],
-      health: "WATCH",
+      evidence: slow
+        ? [
+            `${slow.sku}: ${slow.units}u, ${slow.soldThisMonth} sold`,
+            `Tied on shelf ≈ ${mmk(slow.units * slow.unitCost)}`,
+          ]
+        : ["No slow lot above the threshold"],
+      health: snap.businessHealth,
       generatedAt: GENERATED_AT,
     },
   ],
@@ -138,7 +107,7 @@ export const DEMO_SNAPSHOT: BusinessSnapshot = {
 };
 
 export const ANALYZE_PROMPT =
-  "Analyze my shop this week. Cash on hand, overdue customer credit, upcoming supplier bills, and slow-moving inventory. Tell me what is happening, what is wrong, why it matters, and the single action I should take today.";
+  "What should I do today so cash does not break?";
 
 export function composeAnalyzePrompt(snapshot: BusinessSnapshot) {
   const { context, financials } = snapshot;
