@@ -188,7 +188,7 @@ export async function runTool(
         cashCoverage: snap.tight ? 0 : 1,
         receivableQuality: snap.overdue.length === 0 ? 1 : 0.5,
         stockEfficiency:
-          !snap.stockTurnover || snap.slow.length === 0 ? 1 : snap.slow.length > 3 ? 0 : 0.5,
+          snap.slow.length === 0 ? 1 : snap.slow.length > 3 ? 0 : 0.5,
         salesMomentum:
           snap.salesChange > 0.15 ? 1 : snap.salesChange < -0.15 ? 0 : 0.5,
       };

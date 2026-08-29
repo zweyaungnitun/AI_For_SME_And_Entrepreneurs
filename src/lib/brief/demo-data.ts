@@ -80,13 +80,13 @@ export function snapshotForShop(shopId: string): BusinessSnapshot {
           : "Multiple customers, no single concentration.",
         wrong: snap.recvConcentration > 0.4
           ? "Too much revenue from one buyer creates dependency risk."
-          : snap.stockTurnover && snap.stockTurnover < 0.1
+          : snap.slow.length > 0
             ? "Slow inventory suggests demand or pricing mismatch."
             : "",
         matters: "Market position and pricing directly impact cash generation and business resilience.",
         action: snap.recvConcentration > 0.4
           ? "Develop 2-3 new customer relationships this month to reduce dependency."
-          : snap.stockTurnover && snap.stockTurnover < 0.1
+          : snap.slow.length > 0
             ? "Review pricing or consider switching to faster-moving products."
             : "Maintain customer relationships and monitor competitive position.",
         why: snap.recvConcentration > 0.4
@@ -94,7 +94,7 @@ export function snapshotForShop(shopId: string): BusinessSnapshot {
           : "Strong fundamentals allow focus on growth opportunities.",
         evidence: [
           ...(top ? [`${top.customer}: ${Math.round(snap.recvConcentration * 100)}% concentration`] : []),
-          ...(snap.stockTurnover ? [`Stock turnover: ${(snap.stockTurnover * 100).toFixed(1)}%`] : []),
+          ...(snap.slow.length > 0 ? [`${snap.slow.length} slow-moving items: ${mmk(snap.tiedInSlow)} tied up`] : []),
         ],
         health: snap.recvConcentration > 0.4 ? "WATCH" : snap.businessHealth,
         generatedAt: GENERATED_AT,
