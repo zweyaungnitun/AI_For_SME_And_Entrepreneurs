@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { BrandLink, BrandMark } from "@/components/layout/brand-mark";
 import { useBrief } from "@/components/brief/brief-provider";
+import { ChatbotWidget } from "@/components/chat/chatbot-widget";
 import { cn } from "@/lib/cn";
 
 const NAV = [
@@ -16,6 +17,7 @@ const NAV = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const showChatbot = !pathname.startsWith("/admin") && !pathname.startsWith("/enter");
 
   return (
     <div className="min-h-screen bg-background">
@@ -31,7 +33,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium",
+                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                   active ? "bg-[#eff6ff] text-primary" : "text-muted hover:bg-[#f3f4f6] hover:text-ink",
                 )}
               >
@@ -92,6 +94,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <main className="px-4 py-6 sm:px-6 lg:px-8">{children}</main>
       </div>
+
+      {showChatbot && <ChatbotWidget />}
     </div>
   );
 }

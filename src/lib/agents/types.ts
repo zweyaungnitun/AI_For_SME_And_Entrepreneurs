@@ -27,6 +27,9 @@ export type AgentId =
   | "supply"
   | "resources"
   | "analytics"
+  | "market"
+  | "strategy"
+  | "growth"
   | "books"
   | "action";
 

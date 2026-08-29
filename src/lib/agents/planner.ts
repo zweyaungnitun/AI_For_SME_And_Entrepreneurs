@@ -4,7 +4,7 @@ import type { Ledger } from "@/lib/ledger/types";
 
 export function heuristicPlan(
   message: string,
-  _context: BusinessContext,
+  context: BusinessContext,
   ledger: Ledger,
 ): { agents: AgentId[]; rationale: string } {
   const hay = message.toLowerCase();
@@ -15,16 +15,35 @@ export function heuristicPlan(
   }
 
   const fullAnalyze =
-    /analy|performance|pulse|business|grow|resource|team|suppl/i.test(hay) ||
+    /analy|performance|pulse|business|grow|resource|team|suppl|strategy|plan/i.test(hay) ||
     /what should i do today so cash does not break/i.test(hay) ||
     hay.includes("cash on hand") ||
     hay.includes("overdue customer credit");
 
   const collectOnly = /who (should i |do i )?(collect|follow|call)/i.test(hay) && !fullAnalyze;
 
+  // Strategic and growth queries
+  const strategyQuery = /strateg|plan|roadmap|vision|long.?term|future|direction/i.test(hay);
+  const growthQuery = /grow|scale|expand|revenue|sales|customer|marketing/i.test(hay);
+
+  if (strategyQuery || (fullAnalyze && context.stage !== "idea")) {
+    agents.push("strategy");
+  }
+
+  if (growthQuery || (fullAnalyze && !collectOnly)) {
+    agents.push("growth");
+  }
+
   if (!collectOnly) {
     agents.push("resources");
     if (fullAnalyze || hay.length > 80) agents.push("analytics");
+  }
+
+  // Add market agent for competitive, positioning, or market-related queries
+  const marketQuery =
+    /market|compet|position|pricing|customer|demand|trend|industry/i.test(hay);
+  if (marketQuery || fullAnalyze) {
+    agents.push("market");
   }
 
   if (ledger.receivables.some((r) => r.status === "overdue" || r.overdueDays > 0)) {
@@ -40,7 +59,7 @@ export function heuristicPlan(
 
   return {
     agents,
-    rationale: `Finance-first SME/founder crew for ${ledger.shopType}. Supply if payables or stock. Resources and analytics on a full analyze. Books if the message looks like a credit note.`,
+    rationale: `Comprehensive SME/entrepreneur crew: Finance for cash decisions, Strategy for direction, Growth for revenue, Market for positioning, Analytics for insights, and operational specialists as needed.`,
   };
 }
 

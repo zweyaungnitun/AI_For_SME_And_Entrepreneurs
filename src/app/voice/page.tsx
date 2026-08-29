@@ -5,156 +5,172 @@ import { useSearchParams } from "next/navigation";
 import { useBrief } from "@/components/brief/brief-provider";
 import { AppShell } from "@/components/layout/app-shell";
 import { Card } from "@/components/ui/card";
-import { TranscriptPanel, type TranscriptTurn } from "@/components/voice/transcript-panel";
-import { VoiceControls } from "@/components/voice/voice-controls";
-import { VoiceVisualizer, type VoiceStatus } from "@/components/voice/voice-visualizer";
+import { Button } from "@/components/ui/button";
+import { mmk } from "@/lib/ledger/types";
 
-type SpeechRec = {
-  lang: string;
-  continuous: boolean;
-  interimResults: boolean;
-  start: () => void;
-  stop: () => void;
-  onresult: ((event: {
-    resultIndex: number;
-    results: ArrayLike<{ 0: { transcript: string }; isFinal: boolean }>;
-  }) => void) | null;
-  onerror: (() => void) | null;
-  onend: (() => void) | null;
+type Message = {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: Date;
 };
-
-function getRecognition(): SpeechRec | null {
-  const w = window as unknown as {
-    SpeechRecognition?: new () => SpeechRec;
-    webkitSpeechRecognition?: new () => SpeechRec;
-  };
-  const Ctor = w.SpeechRecognition ?? w.webkitSpeechRecognition;
-  return Ctor ? new Ctor() : null;
-}
 
 function VoiceView() {
   const params = useSearchParams();
-  const { analyze } = useBrief();
-  const [status, setStatus] = useState<VoiceStatus>("idle");
-  const [draft, setDraft] = useState("");
-  const [turns, setTurns] = useState<TranscriptTurn[]>([]);
-  const recRef = useRef<SpeechRec | null>(null);
-  const listenBuffer = useRef("");
-  const sending = useRef(false);
+  const { analyze, snapshot } = useBrief();
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "welcome",
+      role: "assistant",
+      content: `Hello! I'm your SME advisor for ${snapshot.context.name}. I can help you with cash flow, collections, market position, financial planning, and more. What would you like to know?`,
+      timestamp: new Date(),
+    },
+  ]);
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     const preset = params.get("prompt");
-    if (preset) setDraft(preset);
+    if (preset) setInput(preset);
   }, [params]);
 
   useEffect(() => {
-    return () => {
-      recRef.current?.stop();
-      window.speechSynthesis?.cancel();
-    };
-  }, []);
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-  function talk() {
-    const rec = getRecognition();
-    if (!rec) {
-      setStatus("error");
-      return;
-    }
-    rec.lang = "en-US";
-    rec.continuous = true;
-    rec.interimResults = true;
-    listenBuffer.current = "";
-    rec.onresult = (event) => {
-      let text = "";
-      for (let i = event.resultIndex; i < event.results.length; i += 1) {
-        const result = event.results[i];
-        text += result[0].transcript;
-        if (result.isFinal) {
-          listenBuffer.current = `${listenBuffer.current} ${result[0].transcript}`.trim();
-        }
-      }
-      setDraft(listenBuffer.current || text);
-    };
-    rec.onerror = () => setStatus("error");
-    rec.onend = () => undefined;
-    recRef.current = rec;
-    rec.start();
-    setStatus("listening");
-  }
+  async function handleSend() {
+    if (!input.trim() || sending) return;
 
-  function stop() {
-    recRef.current?.stop();
-    const text = (listenBuffer.current || draft).trim();
-    setStatus("idle");
-    if (text) void sendText(text);
-  }
-
-  async function sendText(text: string) {
-    const message = text.trim();
-    if (!message || sending.current) return;
-    sending.current = true;
-    recRef.current?.stop();
-    window.speechSynthesis?.cancel();
-
-    const userTurn: TranscriptTurn = {
-      id: `u-${Date.now()}`,
+    const userMessage: Message = {
+      id: `user-${Date.now()}`,
       role: "user",
-      text: message,
+      content: input.trim(),
+      timestamp: new Date(),
     };
-    const copilotId = `c-${Date.now()}`;
-    setTurns((t) => [...t, userTurn, { id: copilotId, role: "copilot", text: "" }]);
-    setDraft("");
-    listenBuffer.current = "";
-    setStatus("processing");
 
-    const reply = await analyze(message, (acc) => {
-      setTurns((t) =>
-        t.map((turn) => (turn.id === copilotId ? { ...turn, text: acc } : turn)),
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setSending(true);
+
+    const assistantId = `assistant-${Date.now()}`;
+    setMessages((prev) => [
+      ...prev,
+      { id: assistantId, role: "assistant", content: "", timestamp: new Date() },
+    ]);
+
+    const reply = await analyze(userMessage.content, (acc) => {
+      setMessages((prev) =>
+        prev.map((msg) => (msg.id === assistantId ? { ...msg, content: acc } : msg)),
       );
     });
 
-    sending.current = false;
-    const finalText =
-      reply ||
-      "Unable to analyze the shop right now. Please try again.";
-    setTurns((t) =>
-      t.map((turn) => (turn.id === copilotId ? { ...turn, text: finalText } : turn)),
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === assistantId
+          ? { ...msg, content: reply || "Unable to analyze right now. Please try again." }
+          : msg,
+      ),
     );
-    speak(finalText);
+
+    setSending(false);
   }
 
-  function speak(text: string) {
-    if (!window.speechSynthesis || !text.trim()) {
-      setStatus("idle");
-      return;
-    }
-    const utterance = new SpeechSynthesisUtterance(text.slice(0, 500));
-    utterance.onstart = () => setStatus("speaking");
-    utterance.onend = () => setStatus("idle");
-    utterance.onerror = () => setStatus("idle");
-    window.speechSynthesis.speak(utterance);
-  }
+  const quickPrompts = [
+    "What should I prioritize today?",
+    "Show me my cash position",
+    "Who should I collect from first?",
+    "Analyze my market position",
+  ];
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-8">
-      <div className="text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Talk to the copilot</h1>
-        <p className="mt-1 text-sm text-muted">
-          Ask about cash, suppliers, team load, or what not to restock. Text works if the mic is blocked.
+    <div className="mx-auto flex max-w-4xl flex-col gap-6">
+      <div className="space-y-2 text-center">
+        <h1 className="text-3xl font-semibold tracking-tight">AI Business Advisor</h1>
+        <p className="text-sm text-muted">
+          Ask me anything about {snapshot.context.name} · Cash: {mmk(snapshot.financials.cashMmk || "0")}
         </p>
       </div>
-      <VoiceVisualizer status={status} />
-      <Card className="min-h-48">
-        <TranscriptPanel turns={turns} />
+
+      <Card className="flex h-[600px] flex-col">
+        <div className="flex-1 space-y-4 overflow-y-auto p-6">
+          {messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            >
+              <div
+                className={`max-w-[85%] rounded-2xl px-5 py-3 ${
+                  msg.role === "user"
+                    ? "bg-primary text-white"
+                    : "border border-border bg-surface text-ink"
+                }`}
+              >
+                {msg.role === "assistant" && (
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide opacity-70">
+                    SME Advisor
+                  </p>
+                )}
+                <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                  {msg.content || <span className="italic opacity-50">Thinking...</span>}
+                </p>
+                <p className="mt-2 text-xs opacity-60">
+                  {msg.timestamp.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
+
+        <div className="border-t border-border p-4">
+          {messages.length === 1 && (
+            <div className="mb-3 flex flex-wrap gap-2">
+              {quickPrompts.map((prompt) => (
+                <button
+                  key={prompt}
+                  onClick={() => setInput(prompt)}
+                  className="rounded-full border border-border bg-background px-3 py-1.5 text-xs text-muted transition-colors hover:border-primary hover:text-primary"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+              placeholder="Ask about cash flow, collections, market analysis..."
+              disabled={sending}
+              rows={1}
+              className="flex-1 resize-none rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary disabled:opacity-50"
+            />
+            <Button
+              onClick={handleSend}
+              disabled={sending || !input.trim()}
+              className="px-6"
+            >
+              {sending ? "..." : "Send"}
+            </Button>
+          </div>
+          <p className="mt-2 text-xs text-muted">
+            Press Enter to send, Shift+Enter for new line
+          </p>
+        </div>
       </Card>
-      <VoiceControls
-        status={status}
-        draft={draft}
-        onDraft={setDraft}
-        onTalk={talk}
-        onStop={stop}
-        onSend={() => void sendText(draft)}
-      />
     </div>
   );
 }
@@ -162,7 +178,7 @@ function VoiceView() {
 export default function VoicePage() {
   return (
     <AppShell>
-      <Suspense fallback={<p className="text-sm text-muted">Loading voice…</p>}>
+      <Suspense fallback={<p className="text-sm text-muted">Loading advisor...</p>}>
         <VoiceView />
       </Suspense>
     </AppShell>

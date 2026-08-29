@@ -70,6 +70,36 @@ export function snapshotForShop(shopId: string): BusinessSnapshot {
         generatedAt: GENERATED_AT,
       },
       {
+        id: "market",
+        title: "Market position & pricing",
+        summary: snap.recvConcentration > 0.4
+          ? `High customer concentration (${Math.round(snap.recvConcentration * 100)}% in one customer). Diversify to reduce risk.`
+          : "Customer base is reasonably diversified. Focus on repeat business.",
+        happening: top
+          ? `${top.customer} represents ${Math.round(snap.recvConcentration * 100)}% of receivables.`
+          : "Multiple customers, no single concentration.",
+        wrong: snap.recvConcentration > 0.4
+          ? "Too much revenue from one buyer creates dependency risk."
+          : snap.stockTurnover && snap.stockTurnover < 0.1
+            ? "Slow inventory suggests demand or pricing mismatch."
+            : "",
+        matters: "Market position and pricing directly impact cash generation and business resilience.",
+        action: snap.recvConcentration > 0.4
+          ? "Develop 2-3 new customer relationships this month to reduce dependency."
+          : snap.stockTurnover && snap.stockTurnover < 0.1
+            ? "Review pricing or consider switching to faster-moving products."
+            : "Maintain customer relationships and monitor competitive position.",
+        why: snap.recvConcentration > 0.4
+          ? "One customer delay can paralyze the entire business."
+          : "Strong fundamentals allow focus on growth opportunities.",
+        evidence: [
+          ...(top ? [`${top.customer}: ${Math.round(snap.recvConcentration * 100)}% concentration`] : []),
+          ...(snap.stockTurnover ? [`Stock turnover: ${(snap.stockTurnover * 100).toFixed(1)}%`] : []),
+        ],
+        health: snap.recvConcentration > 0.4 ? "WATCH" : snap.businessHealth,
+        generatedAt: GENERATED_AT,
+      },
+      {
         id: "supply",
         title: slow ? `${slow.sku} is slow` : bill ? `${bill.name} is due` : "Supply",
         summary: slow

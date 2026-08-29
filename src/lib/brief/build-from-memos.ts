@@ -34,6 +34,7 @@ function insightIdFor(agentId: AgentMemo["agentId"]) {
   if (agentId === "supply") return "supply";
   if (agentId === "resources") return "resources";
   if (agentId === "analytics") return "analytics";
+  if (agentId === "market") return "market";
   if (agentId === "action" || agentId === "books") return "cashflow";
   return "cashflow";
 }
@@ -51,6 +52,7 @@ export function buildBriefFromCard(
   const supply = memos.find((m) => m.agentId === "supply");
   const resources = memos.find((m) => m.agentId === "resources");
   const analytics = memos.find((m) => m.agentId === "analytics");
+  const market = memos.find((m) => m.agentId === "market");
   const action = memos.find((m) => m.agentId === "action");
 
   const cashflow: BriefInsight = {
@@ -112,6 +114,21 @@ export function buildBriefFromCard(
   );
   analyticsInsight.id = "analytics";
 
+  const marketInsight: BriefInsight = insightFromMemo(
+    market ?? {
+      agentId: "market",
+      name: "Market",
+      summary: "Market position and competitive analysis.",
+      bullets: [],
+      tools: [],
+      ms: 0,
+    },
+    health,
+    generatedAt,
+    previous.insights.find((i) => i.id === "market") ?? DEMO_SNAPSHOT.insights[3],
+  );
+  marketInsight.id = "market";
+
   return {
     ...previous,
     health,
@@ -127,7 +144,7 @@ export function buildBriefFromCard(
             : "Watch cash timing",
       detail: card.keyIssues[0] ?? card.summary,
     },
-    insights: [cashflow, supplyInsight, resourcesInsight, analyticsInsight],
+    insights: [cashflow, supplyInsight, resourcesInsight, analyticsInsight, marketInsight],
     reply: reply || action?.summary || card.priority.action,
     memos,
     updatedAt: generatedAt,
@@ -149,9 +166,9 @@ export function buildBriefFromMemos(
 
   const specialistMemos = memos.filter((m) => m.agentId !== "conductor");
   const byId = new Map(specialistMemos.map((m) => [insightIdFor(m.agentId), m]));
-  const order = ["cashflow", "supply", "resources", "analytics"] as const;
+  const order = ["cashflow", "supply", "resources", "analytics", "market"] as const;
   const insights: BriefInsight[] = order.map((id, i) => {
-    const fallback = previous.insights.find((x) => x.id === id) ?? DEMO_SNAPSHOT.insights[i];
+    const fallback = previous.insights.find((x) => x.id === id) ?? DEMO_SNAPSHOT.insights[Math.min(i, DEMO_SNAPSHOT.insights.length - 1)];
     const memo =
       id === "cashflow"
         ? specialistMemos.find((m) => m.agentId === "finance")

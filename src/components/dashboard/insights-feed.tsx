@@ -8,6 +8,7 @@ const PILLAR: Record<string, string> = {
   supply: "Supply",
   resources: "Resources",
   analytics: "Analytics",
+  market: "Market",
 };
 
 export function InsightsFeed({ insights }: { insights: BriefInsight[] }) {

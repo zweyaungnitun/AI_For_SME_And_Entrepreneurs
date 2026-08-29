@@ -2,6 +2,10 @@
   "mcpServers": {
     "Neon": {
       "url": "https://mcp.neon.tech/mcp"
+    },
+    "gdrive": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-gdrive"]
     }
   }
 }

@@ -128,6 +128,96 @@ export async function runTool(
     return timed(name, { message: message.slice(0, 240) }, () => heuristicExtract(message));
   }
 
+  if (name === "trend_analysis") {
+    return timed(
+      name,
+      {
+        currentSales: ledger.monthSales,
+        lastSales: ledger.lastMonthSales,
+      },
+      () => {
+        const salesChange = snap.salesChange;
+        const trend =
+          salesChange > 0.15 ? "growing" : salesChange < -0.15 ? "declining" : "stable";
+
+        const insights: string[] = [];
+
+        if (trend === "growing") {
+          insights.push(
+            `Sales up ${Math.round(salesChange * 100)}% month-over-month. Strong momentum.`,
+          );
+          insights.push(
+            snap.tight
+              ? "Growth is good, but cash timing is critical. Secure receivables before adding expenses."
+              : "Growth opportunity: consider negotiating better supplier terms to improve margins.",
+          );
+        } else if (trend === "declining") {
+          insights.push(
+            `Sales down ${Math.round(Math.abs(salesChange) * 100)}% month-over-month. Demand softening.`,
+          );
+          insights.push(
+            "Action: Review pricing, customer satisfaction, or switch to faster-moving products.",
+          );
+        } else {
+          insights.push("Sales steady month-over-month. Focus on margins and efficiency.");
+        }
+
+        if (snap.stockTurnover) {
+          if (snap.stockTurnover < 0.1) {
+            insights.push(
+              "Inventory moving slowly — cut reorder quantities or switch suppliers.",
+            );
+          } else if (snap.stockTurnover > 0.5) {
+            insights.push(
+              "Inventory turning fast — strong demand signal. Lock supplier terms for next cycle.",
+            );
+          }
+        }
+
+        return {
+          trend,
+          salesChangePct: salesChange,
+          currentMonth: ledger.monthSales,
+          lastMonth: ledger.lastMonthSales,
+          stockTurnover: snap.stockTurnover,
+          insights,
+          warning: "Based on this snapshot only. Not a 90-day forecast.",
+        };
+      },
+    );
+  }
+
+  if (name === "financial_health_score") {
+    return timed(name, { cash: ledger.cashOnHand, payables: snap.nearTotal }, () => {
+      const factors = {
+        cashCoverage: snap.tight ? 0 : 1,
+        receivableQuality: snap.overdue.length === 0 ? 1 : 0.5,
+        stockEfficiency:
+          !snap.stockTurnover || snap.slow.length === 0 ? 1 : snap.slow.length > 3 ? 0 : 0.5,
+        salesMomentum:
+          snap.salesChange > 0.15 ? 1 : snap.salesChange < -0.15 ? 0 : 0.5,
+      };
+
+      const score =
+        (factors.cashCoverage + factors.receivableQuality + factors.stockEfficiency + factors.salesMomentum) / 4;
+
+      const health = score >= 0.75 ? "OK" : score >= 0.5 ? "WATCH" : "TIGHT";
+
+      return {
+        health,
+        score: Math.round(score * 100),
+        factors,
+        summary:
+          health === "OK"
+            ? "Business fundamentals are solid. Focus on growth opportunities."
+            : health === "WATCH"
+            ? "Some tension in cash timing or operations. Address now before it tightens."
+            : "Critical cash or operational issues. Prioritize collections and delay non-essential spend.",
+        note: "Score based on current snapshot. Not a credit rating.",
+      };
+    });
+  }
+
   if (name === "search_knowledge") {
     const start = Date.now();
     const output = await searchKnowledge(message, shopId ?? DEFAULT_SHOP_ID);

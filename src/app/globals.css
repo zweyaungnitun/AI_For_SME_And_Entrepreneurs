@@ -99,8 +99,25 @@ body {
   }
 }
 
+/* New: Fade-in animation for tab panels */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .wave-bar {
+  .wave-bar,
+  .animate-fade-in {
     animation: none !important;
   }
 }
