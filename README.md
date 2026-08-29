@@ -1,16 +1,16 @@
-# Foundry
+# SME COPILOT
 
 ### Multi-Agent AI Counsel for SMEs & Entrepreneurs
 
-**Foundry** is an AI-powered multi-agent workspace designed to help small businesses and entrepreneurs think through complex business decisions.
+**SME COPILOT** is an AI-powered multi-agent workspace designed to help small businesses and entrepreneurs think through complex business decisions.
 
-Instead of relying on a single AI response, Foundry uses a **crew of specialized AI agents** that analyze a problem from different perspectives and combine their reasoning into a practical recommendation.
+Instead of relying on a single AI response, SME-COPILOT uses a **crew of specialized AI agents** that analyze a problem from different perspectives and combine their reasoning into a practical recommendation.
 
 > **One business problem. Multiple AI specialists. One actionable outcome.**
 
 ---
 
-## 🚀 What Foundry Solves
+## 🚀 What SME-COPILOT Solves
 
 SMEs and entrepreneurs often need to make decisions involving areas such as:
 
@@ -23,7 +23,7 @@ SMEs and entrepreneurs often need to make decisions involving areas such as:
 
 Getting useful advice across all of these areas can be expensive, time-consuming, or difficult to access.
 
-**Foundry brings multiple specialist perspectives into a single AI workflow.**
+**SME-COPILOT brings multiple specialist perspectives into a single AI workflow.**
 
 ---
 
@@ -32,7 +32,7 @@ Getting useful advice across all of these areas can be expensive, time-consuming
 ```text
 User Business Problem
         ↓
-   Foundry Console
+   SME-COPILOT Console
         ↓
  ┌──────────────────────┐
  │   AI Specialist Crew │
@@ -57,7 +57,7 @@ Each specialist focuses on a different aspect of the problem before the final re
 
 ### Multi-Agent Counsel
 
-Instead of asking one general-purpose AI for an answer, Foundry coordinates multiple specialized agents.
+Instead of asking one general-purpose AI for an answer, SME-COPILOT coordinates multiple specialized agents.
 
 ### Streaming Responses
 
@@ -69,7 +69,7 @@ The workflow is designed around real-world SME and entrepreneurial decision-maki
 
 ### Demo Mode
 
-Foundry can run without an API key, making the prototype easy to demonstrate during the hackathon.
+SME-COPILOT can run without an API key, making the prototype easy to demonstrate during the hackathon.
 
 ### Live LLM Mode
 
@@ -85,7 +85,7 @@ An OpenAI-compatible model can be connected through environment variables for re
 http://localhost:3000
 ```
 
-Introduces Foundry and its value proposition.
+Introduces SME-COPILOT and its value proposition.
 
 ### AI Counsel Console
 
@@ -171,27 +171,21 @@ Then open:
 http://localhost:3000
 ```
 
-or
-
-```text
-http://localhost:3000/console
-```
-
 ---
 
 ## 🔑 AI Configuration
 
-Foundry uses **Google Gemini** as its primary LLM provider.
+SME-COPILOT uses **Google Gemini** as its primary LLM provider.
 
 ### Demo Mode
 
-Foundry can run without an API key for hackathon demonstrations.
+SME-COPILOT can run without an API key for hackathon demonstrations.
 
 ```env
 GEMINI_API_KEY=
 ```
 
-When no API key is provided, Foundry uses its demo workflow so the core product experience can still be demonstrated.
+When no API key is provided, SME-COPILOT uses its demo workflow so the core product experience can still be demonstrated.
 
 ### Live AI Mode
 
@@ -208,9 +202,9 @@ The selected Gemini model can be configured through the environment variables.
 
 ## 🤖 AI Architecture
 
-Foundry uses a **multi-agent AI architecture powered by Google Gemini**.
+SME-COPILOT uses a **multi-agent AI architecture powered by Google Gemini**.
 
-Instead of asking one general-purpose model to handle every task, Foundry assigns the business problem to multiple specialist agents.
+Instead of asking one general-purpose model to handle every task, SME-COPILOT assigns the business problem to multiple specialist agents.
 
 ```text
                     Business Problem
@@ -236,7 +230,7 @@ Each specialist provides a focused perspective, and the crew combines those pers
 
 ## 🧠 AI Utilization
 
-AI is the core of Foundry rather than an optional feature.
+AI is the core of SME-COPILOT rather than an optional feature.
 
 Google Gemini is used to:
 
@@ -246,7 +240,7 @@ Google Gemini is used to:
 * Provide structured recommendations
 * Stream responses progressively through the console
 
-The multi-agent approach allows Foundry to approach a single business problem from multiple specialized perspectives.
+The multi-agent approach allows SME-COPILOT to approach a single business problem from multiple specialized perspectives.
 
 ---
 
@@ -271,7 +265,7 @@ The core implementation was created during the official **4-hour Build Window**.
 
 ## 🏆 Hackathon Focus
 
-Foundry was built as a working prototype for the **Cursor Myanmar AI Hackathon**.
+SME-COPILOT was built as a working prototype for the **Cursor Myanmar AI Hackathon**.
 
 The project focuses on:
 
@@ -337,7 +331,7 @@ Add your preferred license here.
 
 ## 👥 Team
 
-**Foundry** was built by **Team Nextmind** for the **Cursor Myanmar AI Hackathon**.
+**SME-COPILOT** was built by **Team Nextmind** for the **Cursor Myanmar AI Hackathon**.
 
 | Member               | GitHub                                               |
 | -------------------- | ---------------------------------------------------- |
@@ -358,4 +352,4 @@ Add your preferred license here.
 
 ---
 
-> **Foundry — Think through the decision before you make it.**
+> **SME-COPILOT — Think through the decision before you make it.**
