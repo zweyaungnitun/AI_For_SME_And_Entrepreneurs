@@ -1,0 +1,13 @@
+---
+description: Next.js App Router UI conventions for Foundry
+globs: src/app/**/*.tsx,src/components/**/*.tsx
+alwaysApply: false
+---
+
+# UI
+
+- Server Components by default. Client only for the console (`Workspace`) and other interactive state.
+- Reuse tokens from `src/app/globals.css`: ink, parchment, copper, sage. No purple AI gradients.
+- Headlines use `font-serif`. Body uses the system sans stack in `globals.css`.
+- Do not add a component library. Keep the landing and console visually related.
+- The console must show crew status, the brief, and the run trace together.

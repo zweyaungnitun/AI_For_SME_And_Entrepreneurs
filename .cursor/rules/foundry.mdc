@@ -1,0 +1,17 @@
+---
+description: Foundry project map, stack, and non-negotiables for every session
+alwaysApply: true
+---
+
+# Foundry
+
+Multi-agent Next.js 15 app. Conductor routes founder asks through specialists.
+
+- Source of truth: `AGENTS.md`
+- UI: `src/app` + `src/components` (App Router, Tailwind v4)
+- Crew: `src/lib/agents` (orchestrator, planner, registry, specialists, tools)
+- LLM: `src/lib/llm/complete.ts` (OpenAI-compatible; demo mode if no key)
+
+Do not add a second agent framework. Extend the existing crew loop.
+
+Voice: sharp operator, executable weekly actions, no generic startup decks.

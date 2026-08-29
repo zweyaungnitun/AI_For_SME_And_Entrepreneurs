@@ -1,0 +1,32 @@
+---
+description: Multi-agent runtime conventions for the Foundry crew
+globs: src/lib/agents/**/*.ts
+alwaysApply: false
+---
+
+# Agent runtime
+
+Each specialist is a `SpecialistDef`: `id`, `keywords`, `tools`, `system`, `demo()`.
+
+- Register new agents in `registry.ts` and add the id to `AgentId`.
+- Tools are local, deterministic functions in `tools.ts`. Do not call the network from tools unless the user asked for a live integration.
+- The orchestrator must keep emitting `AgentEvent` in order: plan, start, tool, end, token, done.
+- `demo()` must still produce a usable founder memo when no API key is set.
+- Planner picks 2–4 specialists. Always keep strategy unless the ask is purely ops.
+
+```ts
+export const exampleAgent: SpecialistDef = {
+  id: "example",
+  name: "Example",
+  title: "One-line job",
+  blurb: "When this agent should run.",
+  accent: "#c4622d",
+  keywords: ["example"],
+  tools: [],
+  system: "You are Foundry's Example agent for SMEs. Be concrete.",
+  demo: ({ context }) => ({
+    summary: `Do the next useful thing for ${context.name}.`,
+    bullets: ["One action this week."],
+  }),
+};
+```
