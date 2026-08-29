@@ -89,7 +89,7 @@ function VoiceView() {
       <div className="space-y-2 text-center">
         <h1 className="text-3xl font-semibold tracking-tight">AI Business Advisor</h1>
         <p className="text-sm text-muted">
-          Ask me anything about {snapshot.context.name} · Cash: {mmk(snapshot.financials.cashMmk || "0")}
+          Ask me anything about {snapshot.context.name} · Cash: {mmk(parseInt(snapshot.financials.cashMmk || "0", 10))}
         </p>
       </div>
 

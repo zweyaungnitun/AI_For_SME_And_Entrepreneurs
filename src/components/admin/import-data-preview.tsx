@@ -2,7 +2,7 @@
 
 import { Card } from "@/components/ui/card";
 import type { ParsedFinancialDoc, FinancialTransaction } from "@/lib/docs/parser";
-import { mmk, type MoneyLine, type StockLine } from "@/lib/ledger/types";
+import { mmk, type Receivable, type Expense, type StockItem } from "@/lib/ledger/types";
 import { analyzeTransactionTrends } from "@/lib/docs/parser";
 
 export function ImportDataPreview({ doc }: { doc: ParsedFinancialDoc }) {
@@ -21,8 +21,8 @@ export function ImportDataPreview({ doc }: { doc: ParsedFinancialDoc }) {
           </span>
         </div>
 
-        {doc.type === "ledger" && doc.data.cashOnHand !== undefined && (
-          <LedgerPreview data={doc.data} />
+        {doc.type === "ledger" && (
+          <LedgerPreview data={doc.data as Partial<import("@/lib/ledger/types").Ledger>} />
         )}
 
         {doc.type === "transactions" && Array.isArray(doc.data) && (
@@ -33,14 +33,14 @@ export function ImportDataPreview({ doc }: { doc: ParsedFinancialDoc }) {
         )}
 
         {doc.type === "inventory" && Array.isArray(doc.data) && (
-          <InventoryPreview data={doc.data as StockLine[]} />
+          <InventoryPreview data={doc.data as StockItem[]} />
         )}
       </div>
     </Card>
   );
 }
 
-function LedgerPreview({ data }: { data: Partial<{ cashOnHand: number; receivables: MoneyLine[]; payables: MoneyLine[] }> }) {
+function LedgerPreview({ data }: { data: Partial<{ cashOnHand: number; receivables: Receivable[]; upcomingExpenses: Expense[] }> }) {
   return (
     <div className="space-y-3">
       <h3 className="text-sm font-semibold uppercase tracking-wide text-muted">
