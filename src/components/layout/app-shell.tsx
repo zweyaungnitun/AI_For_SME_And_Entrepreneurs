@@ -1,0 +1,149 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { BrandLink, BrandMark } from "@/components/layout/brand-mark";
+import { cn } from "@/lib/cn";
+
+const NAV = [
+  { href: "/dashboard", label: "Dashboard", icon: GridIcon },
+  { href: "/insight", label: "Insight", icon: InsightIcon },
+  { href: "/voice", label: "Voice", icon: MicIcon },
+];
+
+export function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="min-h-screen bg-background">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-border bg-surface lg:flex">
+        <div className="px-5 py-5">
+          <BrandLink size="sm" />
+        </div>
+        <nav className="flex flex-1 flex-col gap-1 px-3">
+          {NAV.map((item) => {
+            const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium",
+                  active ? "bg-[#eff6ff] text-primary" : "text-muted hover:bg-[#f3f4f6] hover:text-ink",
+                )}
+              >
+                <item.icon />
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+        <p className="px-5 py-4 text-xs text-muted">Tell me what matters. Then do it today.</p>
+      </aside>
+
+      <div className="lg:pl-60">
+        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-surface/90 px-4 py-3 backdrop-blur lg:hidden">
+          <BrandLink size="sm" />
+          <button
+            type="button"
+            className="grid h-11 w-11 place-items-center rounded-xl border border-border"
+            aria-expanded={open}
+            aria-label={open ? "Close menu" : "Open menu"}
+            onClick={() => setOpen((v) => !v)}
+          >
+            <MenuIcon open={open} />
+          </button>
+        </header>
+
+        {open ? (
+          <div className="fixed inset-0 z-40 lg:hidden">
+            <button
+              type="button"
+              className="absolute inset-0 bg-ink/30"
+              aria-label="Close menu"
+              onClick={() => setOpen(false)}
+            />
+            <div className="absolute inset-y-0 left-0 w-64 bg-surface p-4 shadow-xl">
+              <BrandMark size="sm" />
+              <nav className="mt-6 flex flex-col gap-1">
+                {NAV.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      "rounded-xl px-3 py-3 text-sm font-medium",
+                      pathname === item.href ? "bg-[#eff6ff] text-primary" : "text-ink",
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+          </div>
+        ) : null}
+
+        <main className="px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+      </div>
+    </div>
+  );
+}
+
+function GridIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+    </svg>
+  );
+}
+
+function InsightIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M12 3v4M12 17v4M4.9 6.5l2.8 2.8M16.3 14.7l2.8 2.8M3 12h4M17 12h4M4.9 17.5l2.8-2.8M16.3 9.3l2.8-2.8"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function MicIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="9" y="3" width="6" height="11" rx="3" stroke="currentColor" strokeWidth="1.8" />
+      <path
+        d="M6 11a6 6 0 0 0 12 0M12 17v4"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function MenuIcon({ open }: { open: boolean }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      {open ? (
+        <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      ) : (
+        <path
+          d="M4 7h16M4 12h16M4 17h16"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+      )}
+    </svg>
+  );
+}

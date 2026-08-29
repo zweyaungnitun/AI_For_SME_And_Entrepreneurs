@@ -1,0 +1,9 @@
+---
+description: Hackathon MVP speed rules
+alwaysApply: true
+---
+- Optimize for a working, demoable MVP within a hard 4h window (build + demo prep both inside it).
+- Prefer the smallest implementation that proves the core idea works over "correct" architecture.
+- No premature abstraction, no config for hypothetical future needs.
+- When stuck >10 min on one approach, propose a simpler fallback instead of debugging deeper.
+- Always keep the app in a deployable state — never leave main broken.

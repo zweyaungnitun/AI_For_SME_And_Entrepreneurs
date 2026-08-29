@@ -1,9 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --ink: #14110e;
-  --ink-2: #1c1814;
-  --ink-3: #2a241e;
+  --background: #f8f9fb;
+  --surface: #ffffff;
+  --ink: #111827;
+  --muted: #6b7280;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --ok: #059669;
+  --watch: #d97706;
+  --risk: #dc2626;
+  --border: #e5e7eb;
+  --radius: 12px;
+
+  /* Foundry console (unlinked from new nav) */
+  --foundry-ink: #14110e;
+  --foundry-ink-2: #1c1814;
+  --foundry-ink-3: #2a241e;
   --parchment: #f3ece0;
   --parchment-dim: #d9d0c2;
   --copper: #c4622d;
@@ -11,42 +24,54 @@
   --sage: #6f8f7c;
   --line: rgba(243, 236, 224, 0.12);
   --line-strong: rgba(243, 236, 224, 0.22);
-  --background: var(--ink);
-  --foreground: var(--parchment);
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
   --color-ink: var(--ink);
-  --color-ink-2: var(--ink-2);
-  --color-ink-3: var(--ink-3);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-ok: var(--ok);
+  --color-watch: var(--watch);
+  --color-risk: var(--risk);
+  --color-border: var(--border);
   --color-parchment: var(--parchment);
   --color-parchment-dim: var(--parchment-dim);
   --color-copper: var(--copper);
   --color-copper-bright: var(--copper-bright);
   --color-sage: var(--sage);
-  --font-sans: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-sans: "Segoe UI", Inter, system-ui, sans-serif;
   --font-mono: "SF Mono", "Consolas", ui-monospace, monospace;
   --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
 }
 
 * {
-  border-color: var(--line);
+  border-color: var(--border);
 }
 
 html,
 body {
-  background: var(--ink);
-  color: var(--parchment);
+  background: var(--background);
+  color: var(--ink);
   font-family: var(--font-sans);
 }
 
 body {
   min-height: 100vh;
+}
+
+.foundry-console {
+  min-height: 100vh;
+  background: var(--foundry-ink);
+  color: var(--parchment);
   background-image:
     radial-gradient(1200px 500px at 10% -10%, rgba(196, 98, 45, 0.18), transparent 55%),
     radial-gradient(900px 420px at 90% 0%, rgba(111, 143, 124, 0.12), transparent 50%);
+}
+
+.foundry-console * {
+  border-color: var(--line);
 }
 
 .font-serif {
@@ -58,8 +83,24 @@ body {
 }
 
 .panel {
-  background: color-mix(in srgb, var(--ink-2) 88%, transparent);
+  background: color-mix(in srgb, var(--foundry-ink-2) 88%, transparent);
   border: 1px solid var(--line);
   border-radius: 1.25rem;
   backdrop-filter: blur(12px);
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wave-bar {
+    animation: none !important;
+  }
 }

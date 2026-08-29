@@ -1,0 +1,19 @@
+---
+description: Project tech stack and conventions
+alwaysApply: true
+---
+## Stack
+- Next.js 15, App Router, TypeScript.
+- Tailwind CSS for all styling — no CSS modules, no styled-components, no inline style objects.
+- shadcn/ui for components (already-accessible, pre-styled primitives) — install only the specific components needed via `npx shadcn@latest add <component>`, don't scaffold the whole library upfront.
+- Server Components by default. Only add `"use client"` when the component needs state, effects, or browser APIs.
+- Data mutations: Server Actions first. Only reach for a Route Handler (`app/api/.../route.ts`) if the caller isn't a form/Server Component (e.g. a webhook target, or client-side polling).
+- Client-side data fetching (only when Server Components/Actions genuinely don't fit): TanStack Query.
+- If persistent storage is needed and there's no time to stand up a real DB: start with an in-memory store or a single JSON file read/written server-side. Only add Firebase if the MVP genuinely needs auth or multi-user persistence — don't add a DB "just in case."
+- Deploy target: Netlify.
+
+## Conventions
+- File/folder naming: kebab-case for files, PascalCase for component names.
+- Keep components in `app/_components/` (or colocated per route) unless shared across 3+ routes, then move to `components/`.
+- TypeScript: prefer inferred types; only write explicit interfaces for props and API response shapes. Don't chase 100% strict-mode purity — `any` at a hackathon boundary (e.g. an unverified third-party API response) is fine if commented as such.
+- No new dependency without checking it's actually needed for the MVP feature at hand — every install is time you don't get back.

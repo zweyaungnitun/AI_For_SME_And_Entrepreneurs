@@ -1,0 +1,295 @@
+---
+description: UI/UX research and implementation using Mobbin MCP for the hackathon.
+alwaysApply: false
+---
+
+# MOBBIN UI/UX WORKFLOW
+
+Mobbin MCP is the primary UI/UX research tool for this hackathon.
+
+The goal is NOT to copy a Mobbin design.
+
+The goal is to research existing proven UI patterns and adapt the most suitable design to our specific product, users, and hackathon requirements.
+
+---
+
+# WHEN TO USE MOBBIN
+
+Use Mobbin MCP during the UI/UX planning phase.
+
+Before implementing the main UI:
+
+1. Understand the product requirements.
+2. Identify the main user journey.
+3. Identify the required UI patterns.
+4. Research relevant Mobbin designs.
+5. Compare multiple relevant patterns.
+6. Select the most suitable design direction.
+7. Adapt the design to our product.
+8. Implement the selected design.
+
+Do not start building the final UI before completing this research unless time is critically limited.
+
+---
+
+# MOBBIN RESEARCH PROCESS
+
+First determine what type of interface the product requires.
+
+Examples:
+
+- Landing page
+- SaaS dashboard
+- Emergency assistance interface
+- AI assistant
+- Search interface
+- Form
+- Marketplace
+- Social platform
+- Booking interface
+- Data dashboard
+- Mobile application
+- Onboarding flow
+- Profile
+- Settings
+- Notification center
+
+Then use Mobbin MCP to research relevant examples.
+
+---
+
+# SEARCH STRATEGY
+
+Do not perform one generic search.
+
+Search based on the actual product requirements.
+
+For example, if the product is an emergency assistance platform, research patterns such as:
+
+- Emergency dashboard
+- Emergency reporting
+- Location-based assistance
+- Alert cards
+- Status indicators
+- Map interfaces
+- Help request forms
+- Emergency CTA
+- Resource cards
+
+If the product is an AI application, research:
+
+- AI chat interface
+- AI input
+- AI results
+- AI dashboard
+- AI onboarding
+- AI action cards
+
+Use the actual hackathon problem to determine the search terms.
+
+---
+
+# DESIGN SELECTION
+
+Research multiple relevant designs when possible.
+
+Compare them based on:
+
+1. Relevance to our product
+2. User experience
+3. Simplicity
+4. Clarity
+5. Main CTA visibility
+6. Information hierarchy
+7. Ease of implementation
+8. Mobile responsiveness
+9. Visual quality
+10. Suitability for a 4-hour MVP
+
+Choose the design that provides the best balance between:
+
+> UX quality + visual quality + implementation speed
+
+Do NOT automatically choose the most visually complex design.
+
+---
+
+# ADAPT — DO NOT COPY
+
+Mobbin designs are references.
+
+Do not blindly copy:
+
+- Branding
+- Logos
+- Company names
+- Exact text
+- Product-specific content
+- Unnecessary sections
+- Complex interactions
+
+Instead, extract useful patterns such as:
+
+- Layout
+- Navigation
+- Card structure
+- Spacing
+- Typography hierarchy
+- CTA placement
+- Form structure
+- Information hierarchy
+- Interaction patterns
+- Visual grouping
+
+Adapt these patterns to our product.
+
+---
+
+# DESIGN DIRECTION
+
+After Mobbin research, establish ONE design direction.
+
+Define:
+
+- Overall visual style
+- Layout structure
+- Navigation style
+- Typography hierarchy
+- Color direction
+- Button style
+- Card style
+- Form style
+- Border radius
+- Spacing system
+- Icon usage
+- Responsive behavior
+
+Do not combine unrelated designs from many different products.
+
+The final interface must feel like ONE coherent product.
+
+---
+
+# HACKATHON CONSTRAINT
+
+The design must be realistic to implement within 4 hours.
+
+Prefer:
+
+- Simple layouts
+- Reusable components
+- Clear hierarchy
+- Strong CTA
+- Simple navigation
+- Minimal animations
+- Standard responsive layouts
+
+Avoid:
+
+- Extremely complex animations
+- 3D interfaces
+- Complex visual effects
+- Excessive gradients
+- Complicated navigation
+- Huge component systems
+- Interactions that are difficult to implement
+
+---
+
+# IMPLEMENTATION
+
+After selecting the design direction:
+
+Create reusable components.
+
+For example:
+
+components/
+├── ui/
+│   ├── Button
+│   ├── Card
+│   ├── Input
+│   ├── Badge
+│   └── Modal
+│
+├── Navbar
+├── Hero
+├── FeatureCard
+├── StatusCard
+└── ...
+
+Reuse components instead of recreating the same UI repeatedly.
+
+---
+
+# DESIGN CONSISTENCY
+
+Once a design direction has been selected:
+
+DO NOT randomly change the design later.
+
+Maintain consistency across:
+
+- Colors
+- Typography
+- Buttons
+- Cards
+- Inputs
+- Spacing
+- Icons
+- Border radius
+
+If a new UI element is required, make it fit the existing design system.
+
+---
+
+# RESPONSIVE DESIGN
+
+Use the Mobbin research as inspiration but adapt it for:
+
+- Mobile
+- Tablet
+- Desktop
+
+The primary user journey must remain easy to use on small screens.
+
+Avoid layouts that only work on desktop.
+
+---
+
+# FINAL UI REVIEW
+
+After implementing the UI, compare the result against the selected Mobbin patterns.
+
+Check:
+
+- Is the hierarchy clear?
+- Is the main CTA obvious?
+- Is the interface visually balanced?
+- Is the important information easy to find?
+- Is the design consistent?
+- Does it look like a real product?
+- Is it appropriate for our target users?
+- Is it responsive?
+
+Fix the most important visual problems.
+
+Do not redesign the entire application.
+
+---
+
+# IMPORTANT
+
+Mobbin research should accelerate development, not slow it down.
+
+Maximum research time:
+
+Approximately 10–15 minutes.
+
+Do not spend 30–60 minutes browsing designs.
+
+If several designs are suitable, choose the simplest high-quality option and continue implementation.
+
+The final goal is:
+
+> Research → Select → Adapt → Build → Test → Polish

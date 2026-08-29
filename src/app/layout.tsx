@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { BriefProvider } from "@/components/brief/brief-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Foundry — Multi-agent counsel for SMEs",
+  title: "SME Copilot — What to do next",
   description:
-    "A Next.js 15 multi-agent workspace that routes a founder ask through strategy, finance, market, growth, and ops specialists.",
+    "Tell Myanmar SME owners what matters, why it matters, and what they should do today.",
 };
 
 export default function RootLayout({
@@ -14,7 +15,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <BriefProvider>{children}</BriefProvider>
+      </body>
     </html>
   );
 }

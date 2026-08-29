@@ -1,0 +1,219 @@
+---
+description: Main 4-hour hackathon development workflow. Always follow this workflow.
+alwaysApply: true
+---
+
+# 4-HOUR HACKATHON WORKFLOW
+
+You are an AI coding agent working on a 4-hour hackathon MVP.
+
+Your primary objective is:
+
+> Deliver a working, polished, demo-ready MVP within 4 hours.
+
+Optimize for:
+
+1.Working core user flow
+2.Fast implementation
+3.Strong UI/UX
+4.Reliable demo
+5.Clear value proposition
+6.Visual polish
+7.Stable deployment
+
+Do NOT optimize for:
+
+1.Complex architecture
+2.Over-engineering
+3.Perfect abstractions
+4.Extensive test coverage
+5.Features outside the MVP
+6.Premature optimization
+
+The MVP must be demo-ready before adding optional features.
+
+---
+
+# DEVELOPMENT PHASES
+
+Always identify the current phase before making major changes.
+
+## PHASE 1 — UNDERSTAND
+
+Before coding:
+
+- Understand the problem
+- Identify target users
+- Identify the main pain point
+- Identify the core solution
+- Identify the primary user journey
+- Identify MVP features
+- Identify non-MVP features
+
+Do not start implementing until the MVP scope is clear.
+
+---
+
+## PHASE 2 — PLAN
+
+Create a short implementation plan.
+
+The plan should contain:
+
+- Pages
+- Components
+- Data requirements
+- API requirements
+- External integrations
+- Main user flow
+
+Keep the plan short.
+
+Do not create unnecessary architecture documents.
+
+---
+
+## PHASE 3 — FOUNDATION
+
+Set up only what is required.
+
+Verify:
+
+- Application starts
+- Build works
+- Routing works if required
+- Styling works
+- Required dependencies work
+
+Do not spend excessive time on configuration.
+
+---
+
+## PHASE 4 — CORE IMPLEMENTATION
+
+Implement the most important user journey first.
+
+Priority:
+
+1. Main page
+2. Main CTA
+3. Core feature
+4. Result/output
+5. Required supporting UI
+
+Do not implement secondary features before the core journey works.
+
+---
+
+## PHASE 5 — INTEGRATION
+
+Connect APIs, webhooks, AI services, or other external services.
+
+Handle:
+
+- Loading
+- Success
+- Error
+- Empty response
+- Network failure
+
+Keep integrations simple.
+
+---
+
+## PHASE 6 — TEST
+
+Before adding polish:
+
+- Start the application
+- Test the main user flow
+- Check browser console
+- Check broken buttons
+- Check forms
+- Check API calls
+- Check navigation
+- Check mobile layout
+
+Fix critical problems first.
+
+---
+
+## PHASE 7 — POLISH
+
+Only after functionality works:
+
+- Improve spacing
+- Improve typography
+- Improve visual hierarchy
+- Improve buttons
+- Improve cards
+- Add subtle animations
+- Improve loading states
+- Improve empty states
+- Improve error states
+
+Do not redesign the entire application.
+
+---
+
+## PHASE 8 — FINAL
+
+Before finishing:
+
+- Run production build
+- Fix build errors
+- Test the main demo flow
+- Remove obvious console errors
+- Verify environment variables
+- Verify deployment configuration
+
+Do not start major refactoring.
+
+---
+
+# IMPORTANT AGENT BEHAVIOR
+
+Before implementing a feature, ask:
+
+> "Is this required for the main demo?"
+
+If NO:
+
+Do not implement it unless explicitly requested.
+
+Before creating a new dependency, ask:
+
+> "Can this be implemented with the existing stack?"
+
+If YES:
+
+Do not add the dependency.
+
+Before refactoring code, ask:
+
+> "Will this improve the MVP within the remaining time?"
+
+If NO:
+
+Do not refactor.
+
+---
+
+# CHANGE SAFETY
+
+Do not modify unrelated files.
+
+Do not rewrite working components unnecessarily.
+
+Do not change the project's architecture without a clear reason.
+
+Do not replace libraries unless the existing library is blocking development.
+
+When fixing a bug:
+
+1. Identify the root cause
+2. Make the smallest reasonable fix
+3. Verify the fix
+4. Continue development
+
+Avoid large rewrites.
