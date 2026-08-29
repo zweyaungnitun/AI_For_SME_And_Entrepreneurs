@@ -116,41 +116,46 @@ export function FinancialDocs() {
         <h2 className="mb-4 text-lg font-semibold">Document Categories</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {FINANCIAL_CATEGORIES.map((category) => (
-            <Card
+            <button
               key={category.id}
-              className={`cursor-pointer transition-all hover:shadow-md ${
-                selectedCategory === category.id ? "border-primary ring-2 ring-primary/20" : ""
-              }`}
+              type="button"
               onClick={() => setSelectedCategory(category.id)}
+              className="text-left"
             >
-              <div className="space-y-3">
-                <div className="flex items-start justify-between">
-                  <div className="text-4xl">{category.icon}</div>
-                  <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                    {category.count}
-                  </span>
-                </div>
-                <div>
-                  <h3 className="font-semibold">{category.name}</h3>
-                  <p className="mt-1 text-sm text-muted">{category.description}</p>
-                </div>
-                {category.templates && category.templates.length > 0 && (
-                  <div className="pt-3 border-t border-border">
-                    <p className="mb-2 text-xs font-semibold text-muted">Quick Templates:</p>
-                    <div className="flex flex-wrap gap-1">
-                      {category.templates.map((template) => (
-                        <span
-                          key={template}
-                          className="rounded-md bg-muted/30 px-2 py-1 text-xs text-muted hover:bg-primary/10 hover:text-primary"
-                        >
-                          {template}
-                        </span>
-                      ))}
-                    </div>
+              <Card
+                className={`cursor-pointer transition-all hover:shadow-md ${
+                  selectedCategory === category.id ? "border-primary ring-2 ring-primary/20" : ""
+                }`}
+              >
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="text-4xl">{category.icon}</div>
+                    <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                      {category.count}
+                    </span>
                   </div>
-                )}
-              </div>
-            </Card>
+                  <div>
+                    <h3 className="font-semibold">{category.name}</h3>
+                    <p className="mt-1 text-sm text-muted">{category.description}</p>
+                  </div>
+                  {category.templates && category.templates.length > 0 && (
+                    <div className="pt-3 border-t border-border">
+                      <p className="mb-2 text-xs font-semibold text-muted">Quick Templates:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {category.templates.map((template) => (
+                          <span
+                            key={template}
+                            className="rounded-md bg-muted/30 px-2 py-1 text-xs text-muted hover:bg-primary/10 hover:text-primary"
+                          >
+                            {template}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </button>
           ))}
         </div>
       </div>
