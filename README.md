@@ -320,25 +320,24 @@ Add your preferred license here.
 
 ## 👥 Team
 
-**Project:** Foundry
-**Hackathon:** Cursor Myanmar AI Hackathon
+**Foundry** was built by **Team Nextmind** for the **Cursor Myanmar AI Hackathon**.
 
-Team members:
+| Member               | GitHub                                               |
+| -------------------- | ---------------------------------------------------- |
+| **Min Thway Khant**  | [@iz-dmo](https://github.com/iz-dmo)                 |
+| **Hein Khant Phyoe** | [@Heinkhantphyoe](https://github.com/Heinkhantphyoe) |
+| **Zwe Yaung Ni Tun** | [@zweyaungnitun](https://github.com/zweyaungnitun)   |
 
-* [Member 1]
-* [Member 2]
-* [Member 3]
-* [Member 4]
+### Team Members
 
----
+* **Min Thway Khant** — [GitHub](https://github.com/iz-dmo)
+* **Hein Khant Phyoe** — [GitHub](https://github.com/Heinkhantphyoe)
+* **Zwe Yaung Ni Tun** — [GitHub](https://github.com/zweyaungnitun)
+
 
 ## 🔗 Project Links
 
-**Live Demo:** [Add URL]
-
-**GitHub:** [Add repository URL]
-
-**Demo Video:** [Add URL if available]
+**Live Demo:** [https://deploy-preview-1--smeandentrepreneurshipcopilot.netlify.app/]
 
 ---
 
