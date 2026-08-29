@@ -2,6 +2,7 @@ import { analyzeLedger } from "@/lib/ledger/analyze";
 import { mmk, type Ledger } from "@/lib/ledger/types";
 import type { BusinessContext, ToolResult } from "@/lib/agents/types";
 import { searchKnowledge } from "@/lib/db/knowledge";
+import { DEFAULT_SHOP_ID } from "@/lib/sme/catalog";
 
 function timed<T>(name: string, input: Record<string, unknown>, run: () => T): ToolResult {
   const start = Date.now();
@@ -10,7 +11,7 @@ function timed<T>(name: string, input: Record<string, unknown>, run: () => T): T
 
 export async function runTool(
   name: string,
-  _context: BusinessContext,
+  context: BusinessContext,
   message: string,
   ledger: Ledger,
   shopId?: string,
@@ -70,16 +71,69 @@ export async function runTool(
     }));
   }
 
+  if (name === "supplier_pressure") {
+    return timed(name, { payables: snap.near.length, skus: ledger.inventory.length }, () => ({
+      shopType: ledger.shopType,
+      tight: snap.tight,
+      suppliers: snap.near.map((e) => ({
+        name: e.name,
+        amount: e.amount,
+        dueInDays: e.dueInDays,
+      })),
+      slowLots: snap.slow.map((s) => s.sku),
+      constraint: snap.tight
+        ? "Do not place a new purchase order until overdue cash is in or a payable is delayed."
+        : "Reorder only what moved. Do not add slow lots.",
+    }));
+  }
+
+  if (name === "resource_load") {
+    return timed(
+      name,
+      { teamSize: context.teamSize, overdue: snap.overdue.length },
+      () => {
+        const collectionLoad = snap.overdue.length;
+        const strained = snap.tight && context.teamSize <= 2;
+        return {
+          teamSize: context.teamSize,
+          overdueCount: collectionLoad,
+          payableCount: snap.near.length,
+          inventoryLines: ledger.inventory.length,
+          tight: snap.tight,
+          strained,
+          constraint: "Do not hire. Put owner time on the named collection or delay the payable.",
+          why: strained
+            ? `Team of ${context.teamSize} while cash is TIGHT and ${collectionLoad} overdue ${collectionLoad === 1 ? "party" : "parties"} sit.`
+            : `Team of ${context.teamSize}. Collection load is ${collectionLoad}.`,
+        };
+      },
+    );
+  }
+
+  if (name === "business_pulse") {
+    return timed(name, { sales: ledger.monthSales, last: ledger.lastMonthSales }, () => ({
+      salesChangePct: snap.salesChange,
+      cashGap: snap.cashGap,
+      tight: snap.tight,
+      recvConcentrationPct: snap.recvConcentration,
+      topShare: snap.topCustomer
+        ? { customer: snap.topCustomer.customer, amount: snap.topCustomer.amount }
+        : null,
+      slowSkuCount: snap.slow.length,
+      note: "This snapshot only. Not a forecast. Not a growth guarantee.",
+    }));
+  }
+
   if (name === "extract_note") {
     return timed(name, { message: message.slice(0, 240) }, () => heuristicExtract(message));
   }
 
   if (name === "search_knowledge") {
     const start = Date.now();
-    const output = await searchKnowledge(message, shopId ?? "daw-hla");
+    const output = await searchKnowledge(message, shopId ?? DEFAULT_SHOP_ID);
     return {
       name,
-      input: { q: message.slice(0, 120), shopId: shopId ?? "daw-hla" },
+      input: { q: message.slice(0, 120), shopId: shopId ?? DEFAULT_SHOP_ID },
       output,
       ms: Date.now() - start,
     };
@@ -115,6 +169,7 @@ function heuristicExtract(message: string): ExtractedNote {
     [/daw\s*kyi/i, "Daw Kyi"],
     [/bride\s*su/i, "Bride Su"],
     [/maung\s*maung|မောင်မောင်/i, "Maung Maung"],
+    [/ko\s*htet/i, "Ko Htet"],
   ];
   const hit = names.find(([re]) => re.test(message));
   const customer = hit?.[1];

@@ -140,7 +140,7 @@ function VoiceView() {
       <div className="text-center">
         <h1 className="text-2xl font-semibold tracking-tight">Talk to the copilot</h1>
         <p className="mt-1 text-sm text-muted">
-          Ask about cash, who to collect from, or what not to restock. Text works if the mic is blocked.
+          Ask about cash, suppliers, team load, or what not to restock. Text works if the mic is blocked.
         </p>
       </div>
       <VoiceVisualizer status={status} />

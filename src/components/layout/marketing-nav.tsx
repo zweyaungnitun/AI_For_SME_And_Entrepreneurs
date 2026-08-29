@@ -6,10 +6,10 @@ export function MarketingNav() {
     <header className="flex items-center justify-between gap-4">
       <BrandLink />
       <nav className="flex items-center gap-2 sm:gap-3">
-        <Button href="/dashboard" variant="ghost" size="sm" className="hidden sm:inline-flex">
-          Dashboard
+        <Button href="/enter" variant="ghost" size="sm" className="hidden sm:inline-flex">
+          Open a workspace
         </Button>
-        <Button href="/dashboard" size="sm">
+        <Button href="/enter" size="sm">
           Get started
         </Button>
       </nav>

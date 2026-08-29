@@ -3,9 +3,9 @@ import { BriefProvider } from "@/components/brief/brief-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SME Copilot — What to do next",
+  title: "SME Copilot — Financial decisions, operations, this week",
   description:
-    "Tell Myanmar SME owners what matters, why it matters, and what they should do today.",
+    "A practical AI partner for Myanmar SMEs and entrepreneurs: financial decisions, everyday management, and growth this week. Helps organize numbers for a discussion.",
 };
 
 export default function RootLayout({

@@ -1,21 +1,25 @@
 const FEATURES = [
   {
-    title: "Analyze",
-    body: "See business health in one badge — OK, WATCH, or TIGHT — from the numbers you already have.",
+    title: "Finance",
+    body: "Cash vs bills this week, and who to collect first. Health is OK, WATCH, or TIGHT — nothing else.",
   },
   {
-    title: "Detect risk",
-    body: "Spot cash pressure, overdue credit, and slow stock before they become a missed supplier payment.",
+    title: "Supply chain",
+    body: "Supplier dates and slow lots. Do not restock what already sits. Do not invent stock if the shelf is empty.",
   },
   {
-    title: "Get today's priority",
-    body: "One recommended action, with the evidence behind it. Not a dashboard of charts to interpret.",
+    title: "Resources",
+    body: "Put owner time on the named follow-up. Team load is a this-week constraint — we do not hire.",
+  },
+  {
+    title: "Analytics",
+    body: "Sales vs last month and credit concentration on this snapshot only. Not a forecast. Not ads.",
   },
 ];
 
 export function FeatureCards() {
   return (
-    <section className="grid gap-4 sm:grid-cols-3">
+    <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {FEATURES.map((feature, i) => (
         <article
           key={feature.title}

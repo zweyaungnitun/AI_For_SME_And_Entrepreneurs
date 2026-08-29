@@ -55,6 +55,7 @@ Desktop.ini
 !.cursor/rules/**
 !.cursor/skills/
 !.cursor/skills/**
+!.cursor/mcp.json
 
 # local scratch
 *.local

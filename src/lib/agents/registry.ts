@@ -1,12 +1,16 @@
 import { actionAgent } from "@/lib/agents/specialists/action";
+import { analyticsAgent } from "@/lib/agents/specialists/analytics";
 import { booksAgent } from "@/lib/agents/specialists/books";
 import { financeAgent } from "@/lib/agents/specialists/finance";
-import { opsAgent } from "@/lib/agents/specialists/ops";
+import { resourcesAgent } from "@/lib/agents/specialists/resources";
+import { supplyAgent } from "@/lib/agents/specialists/supply";
 import type { AgentId, SpecialistDef } from "@/lib/agents/types";
 
 export const specialists: SpecialistDef[] = [
   financeAgent,
-  opsAgent,
+  supplyAgent,
+  resourcesAgent,
+  analyticsAgent,
   booksAgent,
   actionAgent,
 ];

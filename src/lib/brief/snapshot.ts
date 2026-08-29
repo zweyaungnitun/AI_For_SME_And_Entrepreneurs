@@ -1,6 +1,6 @@
 import { analyzeLedger } from "@/lib/ledger/analyze";
 import { mmk, type Ledger } from "@/lib/ledger/types";
-import { getShop } from "@/lib/sme/catalog";
+import { DEFAULT_SHOP_ID, getShop } from "@/lib/sme/catalog";
 import type { FinancialInputs, Metric } from "@/lib/brief/types";
 
 export function parseMmk(value: string) {
@@ -10,7 +10,7 @@ export function parseMmk(value: string) {
 
 export function ledgerFromFinancials(
   financials: FinancialInputs,
-  shopId = "daw-hla",
+  shopId = DEFAULT_SHOP_ID,
 ): Ledger {
   const shop = getShop(shopId);
   const ledger = structuredClone(shop.ledger);
@@ -40,6 +40,10 @@ export function ledgerFromFinancials(
 export function metricsFromLedger(ledger: Ledger): Metric[] {
   const snap = analyzeLedger(ledger);
   const slow = snap.slow[0];
+  const teamHint =
+    snap.tight && ledger.receivables.filter((r) => r.overdueDays > 0).length > 0
+      ? "Owner time on collections"
+      : "This week's list";
   return [
     {
       id: "cash",
@@ -66,10 +70,27 @@ export function metricsFromLedger(ledger: Ledger): Metric[] {
     },
     {
       id: "inventory",
-      label: "Inventory flag",
+      label: "Supply / stock",
       value: slow ? "Slow-moving" : ledger.inventory.length ? "Moving" : "No stock",
-      hint: slow ? slow.sku : "No slow lot",
-      tone: slow ? "watch" : "neutral",
+      hint: slow ? slow.sku : snap.near[0]?.name ?? "No slow lot",
+      tone: slow || snap.tight ? "watch" : "neutral",
+    },
+    {
+      id: "sales",
+      label: "Sales pulse",
+      value:
+        snap.salesChange === 0
+          ? "Flat vs last month"
+          : `${snap.salesChange > 0 ? "+" : ""}${snap.salesChange}%`,
+      hint: "This snapshot only — not a forecast",
+      tone: "neutral",
+    },
+    {
+      id: "team",
+      label: "Team load",
+      value: snap.tight ? "Strained" : "Manageable",
+      hint: teamHint,
+      tone: snap.tight ? "watch" : "ok",
     },
   ];
 }

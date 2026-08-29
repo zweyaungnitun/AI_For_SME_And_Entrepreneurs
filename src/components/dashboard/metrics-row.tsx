@@ -3,7 +3,7 @@ import type { Metric } from "@/lib/brief/types";
 
 export function MetricsRow({ metrics }: { metrics: Metric[] }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       {metrics.map((metric) => (
         <MetricTile key={metric.id} metric={metric} />
       ))}

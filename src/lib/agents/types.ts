@@ -21,7 +21,14 @@ export type ChatTurn = {
   content: string;
 };
 
-export type AgentId = "conductor" | "finance" | "ops" | "books" | "action";
+export type AgentId =
+  | "conductor"
+  | "finance"
+  | "supply"
+  | "resources"
+  | "analytics"
+  | "books"
+  | "action";
 
 export type ToolResult = {
   name: string;

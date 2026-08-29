@@ -9,8 +9,11 @@ export type ShopType =
   | "online"
   | "manufacturing";
 
+export type VentureKind = "sme" | "founder";
+
 export type ShopProfile = {
   id: string;
+  kind: VentureKind;
   type: ShopType;
   label: string;
   debtorLabel: string;
@@ -32,6 +35,7 @@ export const SHOP_TYPES: ShopType[] = [
 export const SHOPS: ShopProfile[] = [
   {
     id: "daw-hla",
+    kind: "sme",
     type: "wholesale",
     label: "Wholesale",
     debtorLabel: "credit buyer",
@@ -67,6 +71,7 @@ export const SHOPS: ShopProfile[] = [
   },
   {
     id: "lin-htet-mart",
+    kind: "sme",
     type: "retail",
     label: "Retail shop",
     debtorLabel: "regular",
@@ -106,6 +111,7 @@ export const SHOPS: ShopProfile[] = [
   },
   {
     id: "innwa-kitchen",
+    kind: "sme",
     type: "restaurant",
     label: "Restaurant / tea shop",
     debtorLabel: "tab",
@@ -143,6 +149,7 @@ export const SHOPS: ShopProfile[] = [
   },
   {
     id: "may-salon",
+    kind: "sme",
     type: "services",
     label: "Services",
     debtorLabel: "client",
@@ -176,6 +183,7 @@ export const SHOPS: ShopProfile[] = [
   },
   {
     id: "nwe-online",
+    kind: "sme",
     type: "online",
     label: "Online / social seller",
     debtorLabel: "COD / transfer",
@@ -211,6 +219,7 @@ export const SHOPS: ShopProfile[] = [
   },
   {
     id: "shwe-garment",
+    kind: "sme",
     type: "manufacturing",
     label: "Workshop / light manufacturing",
     debtorLabel: "buyer",
@@ -243,9 +252,49 @@ export const SHOPS: ShopProfile[] = [
       "Should I buy more leftover cotton?",
     ],
   },
+  {
+    id: "nandar-studio",
+    kind: "founder",
+    type: "services",
+    label: "Founder / solo studio",
+    debtorLabel: "client",
+    stockLabel: "supplies",
+    context: {
+      name: "Nandar Design Studio",
+      industry: "services",
+      stage: "pre-revenue",
+      location: "Yankin, Yangon",
+      teamSize: 1,
+      challenge: "Coworking desk is due in three days; Ko Htet has not paid the brand-kit invoice.",
+    },
+    ledger: {
+      currency: "MMK",
+      shopType: "services",
+      cashOnHand: 180_000,
+      monthSales: 120_000,
+      lastMonthSales: 90_000,
+      upcomingExpenses: [{ name: "Coworking desk", amount: 200_000, dueInDays: 3 }],
+      receivables: [
+        { customer: "Ko Htet", amount: 160_000, overdueDays: 5, status: "overdue" },
+      ],
+      inventory: [],
+    },
+    prompts: [
+      "What should I do today so cash does not break?",
+      "Which client invoice first?",
+      "Should I take a new unpaid project?",
+    ],
+  },
 ];
 
 export const DEFAULT_SHOP_ID = "daw-hla";
+
+/** Demo identities a visitor can open. Not an admin tenant list. */
+export const DEMO_ENTRY_IDS = ["daw-hla", "nandar-studio"] as const;
+
+export function isKnownShop(id?: string) {
+  return Boolean(id && SHOPS.some((shop) => shop.id === id));
+}
 
 export function getShop(id?: string) {
   return SHOPS.find((s) => s.id === id) ?? SHOPS[0];
@@ -256,7 +305,7 @@ export function shopVoice(type: ShopType) {
     case "restaurant":
       return "Speak as a kitchen operator: tabs, suppliers, slow dishes. One action this week.";
     case "services":
-      return "Speak as a studio/clinic operator: unpaid client work, rent/chair, no fake inventory advice if stock is empty.";
+      return "Speak as a studio or solo founder: unpaid client work, rent/desk/chair. No fake inventory advice if stock is empty. Do not take new unpaid work until cash is in.";
     case "online":
       return "Speak as a social seller: COD, transfers, listings. Do not recommend boosting ads before cash is collected.";
     case "manufacturing":

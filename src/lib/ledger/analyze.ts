@@ -1,4 +1,4 @@
-import { mmk, type BusinessHealth, type Ledger } from "@/lib/ledger/types";
+import { type BusinessHealth, type Ledger } from "@/lib/ledger/types";
 
 export function dueSoon(ledger: Ledger, withinDays = 7) {
   return ledger.upcomingExpenses.filter((e) => e.dueInDays <= withinDays);
@@ -50,6 +50,11 @@ export function analyzeLedger(ledger: Ledger) {
   else if (overdue.length > 0 || slow.length > 0) businessHealth = "WATCH";
 
   const topCustomer = overdue[0] ?? ranked[0] ?? null;
+  const recvTotal = sum(ranked.map((r) => r.amount));
+  const recvConcentration =
+    recvTotal === 0 || !topCustomer
+      ? 0
+      : Math.round((topCustomer.amount / recvTotal) * 100);
 
   return {
     cashOnHand: ledger.cashOnHand,
@@ -58,6 +63,8 @@ export function analyzeLedger(ledger: Ledger) {
     ranked,
     overdue,
     overdueTotal,
+    recvTotal,
+    recvConcentration,
     slow,
     tiedInSlow,
     cashGap,

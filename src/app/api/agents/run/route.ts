@@ -1,7 +1,7 @@
 import { runCrew } from "@/lib/agents/orchestrator";
 import type { BusinessContext, RunRequest } from "@/lib/agents/types";
 import type { Ledger } from "@/lib/ledger/types";
-import { getShop } from "@/lib/sme/catalog";
+import { getShop, isKnownShop } from "@/lib/sme/catalog";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,11 +25,11 @@ export async function POST(req: Request) {
     return Response.json({ error: "message is required" }, { status: 400 });
   }
 
-  const shop = getShop(body.shopId);
+  const shop = getShop(isKnownShop(body.shopId) ? body.shopId : undefined);
   const input: RunRequest = {
     message,
     sessionId: body.sessionId,
-    shopId: body.shopId ?? shop.id,
+    shopId: shop.id,
     context: isContext(body.context) ? { ...shop.context, ...body.context } : shop.context,
     snapshot: isSnapshot(body.snapshot) ? body.snapshot : undefined,
   };

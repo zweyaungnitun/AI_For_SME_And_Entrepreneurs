@@ -3,6 +3,13 @@ import { HealthBadge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import type { BriefInsight } from "@/lib/brief/types";
 
+const PILLAR: Record<string, string> = {
+  cashflow: "Finance",
+  supply: "Supply",
+  resources: "Resources",
+  analytics: "Analytics",
+};
+
 export function InsightsFeed({ insights }: { insights: BriefInsight[] }) {
   if (insights.length === 0) {
     return (
@@ -27,7 +34,10 @@ export function InsightsFeed({ insights }: { insights: BriefInsight[] }) {
               className="flex items-start justify-between gap-4 py-3 hover:opacity-80"
             >
               <div>
-                <p className="font-medium text-ink">{insight.title}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                  {PILLAR[insight.id] ?? insight.id}
+                </p>
+                <p className="mt-1 font-medium text-ink">{insight.title}</p>
                 <p className="mt-1 text-sm text-muted">{insight.summary}</p>
               </div>
               <HealthBadge status={insight.health} />

@@ -46,6 +46,7 @@ export type FinancialInputs = {
 };
 
 export type BusinessSnapshot = {
+  shopId: string;
   context: BusinessContext;
   financials: FinancialInputs;
   health: HealthStatus;

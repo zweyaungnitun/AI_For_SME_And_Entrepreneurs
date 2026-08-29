@@ -8,6 +8,36 @@ function firstLine(text: string) {
   return text.split("\n").map((l) => l.trim()).find(Boolean) ?? "";
 }
 
+function insightFromMemo(
+  memo: AgentMemo,
+  health: HealthStatus,
+  generatedAt: string,
+  fallback: BriefInsight,
+): BriefInsight {
+  const bullets = memo.bullets.filter(Boolean);
+  return {
+    id: insightIdFor(memo.agentId),
+    title: `${memo.name}: ${firstLine(memo.summary).slice(0, 72) || memo.name}`,
+    summary: memo.summary,
+    happening: memo.summary,
+    wrong: bullets[0] ?? fallback.wrong,
+    matters: bullets[1] ?? fallback.matters,
+    action: bullets[2] ?? fallback.action,
+    why: bullets[3] ?? memo.summary,
+    evidence: bullets.length ? bullets : fallback.evidence,
+    health,
+    generatedAt,
+  };
+}
+
+function insightIdFor(agentId: AgentMemo["agentId"]) {
+  if (agentId === "supply") return "supply";
+  if (agentId === "resources") return "resources";
+  if (agentId === "analytics") return "analytics";
+  if (agentId === "action" || agentId === "books") return "cashflow";
+  return "cashflow";
+}
+
 export function buildBriefFromCard(
   card: DecisionCard,
   memos: AgentMemo[],
@@ -16,9 +46,11 @@ export function buildBriefFromCard(
 ): BusinessSnapshot {
   const generatedAt = new Date().toISOString();
   const health = card.businessHealth;
-  const ledger = ledgerFromFinancials(previous.financials);
+  const ledger = ledgerFromFinancials(previous.financials, previous.shopId);
   const finance = memos.find((m) => m.agentId === "finance");
-  const ops = memos.find((m) => m.agentId === "ops");
+  const supply = memos.find((m) => m.agentId === "supply");
+  const resources = memos.find((m) => m.agentId === "resources");
+  const analytics = memos.find((m) => m.agentId === "analytics");
   const action = memos.find((m) => m.agentId === "action");
 
   const cashflow: BriefInsight = {
@@ -35,40 +67,50 @@ export function buildBriefFromCard(
     generatedAt,
   };
 
-  const recvIssue = card.keyIssues.find((i) => /overdue|collect/i.test(i));
-  const receivables: BriefInsight = {
-    id: "receivables",
-    title: recvIssue ? recvIssue : "Credit follow-up",
-    summary: finance?.summary ?? card.summary,
-    happening: finance?.summary ?? card.summary,
-    wrong: recvIssue ?? (finance?.bullets[0] ?? card.keyIssues[0] ?? ""),
-    matters: "Named overdue credit is the fastest cash in before the payable hits.",
-    action: card.reminder
-      ? `Copy a reminder for ${card.reminder.customer}.`
-      : card.priority.action,
-    why: card.priority.reason,
-    evidence: finance?.bullets.length ? finance.bullets : card.evidence,
+  const supplyInsight: BriefInsight = insightFromMemo(
+    supply ?? {
+      agentId: "supply",
+      name: "Supply",
+      summary: card.recommendations[0] ?? "Do not trap more cash in the chain.",
+      bullets: card.recommendations,
+      tools: [],
+      ms: 0,
+    },
     health,
     generatedAt,
-  };
+    previous.insights.find((i) => i.id === "supply") ?? DEMO_SNAPSHOT.insights[1],
+  );
+  supplyInsight.id = "supply";
 
-  const slowIssue = card.keyIssues.find((i) => /slow/i.test(i));
-  const inventory: BriefInsight = {
-    id: "inventory",
-    title: slowIssue ?? ops?.summary ?? "Stock",
-    summary: ops?.summary ?? slowIssue ?? "No slow lot flagged.",
-    happening: ops?.summary ?? "Stock is a cash signal, not a separate app.",
-    wrong: ops?.bullets[0] ?? slowIssue ?? "Do not restock what is already sitting.",
-    matters: "Buying more of a slow SKU locks cash you need for the payable.",
-    action:
-      card.recommendations[0] ??
-      ops?.bullets[0] ??
-      "Do not restock slow lots this week.",
-    why: "Slow units on the shelf are cash you cannot spend.",
-    evidence: ops?.bullets.length ? ops.bullets : card.recommendations,
+  const resourcesInsight: BriefInsight = insightFromMemo(
+    resources ?? {
+      agentId: "resources",
+      name: "Resources",
+      summary: "Put owner time on the named follow-up. Do not hire.",
+      bullets: finance?.bullets ?? [],
+      tools: [],
+      ms: 0,
+    },
     health,
     generatedAt,
-  };
+    previous.insights.find((i) => i.id === "resources") ?? DEMO_SNAPSHOT.insights[2],
+  );
+  resourcesInsight.id = "resources";
+
+  const analyticsInsight: BriefInsight = insightFromMemo(
+    analytics ?? {
+      agentId: "analytics",
+      name: "Analytics",
+      summary: "This snapshot only. Not a forecast.",
+      bullets: card.evidence,
+      tools: [],
+      ms: 0,
+    },
+    health,
+    generatedAt,
+    previous.insights.find((i) => i.id === "analytics") ?? DEMO_SNAPSHOT.insights[3],
+  );
+  analyticsInsight.id = "analytics";
 
   return {
     ...previous,
@@ -77,10 +119,15 @@ export function buildBriefFromCard(
     metrics: metricsFromLedger(ledger),
     priority: card.priority,
     risk: {
-      title: health === "TIGHT" ? "Short-term cash pressure" : health === "OK" ? "No urgent cash flag" : "Watch cash timing",
+      title:
+        health === "TIGHT"
+          ? "Short-term cash pressure"
+          : health === "OK"
+            ? "No urgent cash flag"
+            : "Watch cash timing",
       detail: card.keyIssues[0] ?? card.summary,
     },
-    insights: [cashflow, receivables, inventory],
+    insights: [cashflow, supplyInsight, resourcesInsight, analyticsInsight],
     reply: reply || action?.summary || card.priority.action,
     memos,
     updatedAt: generatedAt,
@@ -101,26 +148,17 @@ export function buildBriefFromMemos(
   else if (/\b(healthy|on track|stable|ok)\b/.test(t)) health = "OK";
 
   const specialistMemos = memos.filter((m) => m.agentId !== "conductor");
-  const insights: BriefInsight[] =
-    specialistMemos.length > 0
-      ? specialistMemos.slice(0, 3).map((memo, i) => {
-          const fallback = previous.insights[i] ?? DEMO_SNAPSHOT.insights[0];
-          const bullets = memo.bullets.filter(Boolean);
-          return {
-            id: memo.agentId === "ops" ? "inventory" : memo.agentId === "action" ? "receivables" : "cashflow",
-            title: `${memo.name}: ${firstLine(memo.summary).slice(0, 72) || memo.name}`,
-            summary: memo.summary,
-            happening: memo.summary,
-            wrong: bullets[0] ?? fallback.wrong,
-            matters: bullets[1] ?? fallback.matters,
-            action: bullets[2] ?? fallback.action,
-            why: bullets[3] ?? memo.summary,
-            evidence: bullets.length ? bullets : fallback.evidence,
-            health,
-            generatedAt,
-          };
-        })
-      : previous.insights.map((insight) => ({ ...insight, health, generatedAt }));
+  const byId = new Map(specialistMemos.map((m) => [insightIdFor(m.agentId), m]));
+  const order = ["cashflow", "supply", "resources", "analytics"] as const;
+  const insights: BriefInsight[] = order.map((id, i) => {
+    const fallback = previous.insights.find((x) => x.id === id) ?? DEMO_SNAPSHOT.insights[i];
+    const memo =
+      id === "cashflow"
+        ? specialistMemos.find((m) => m.agentId === "finance")
+        : byId.get(id);
+    if (!memo) return { ...fallback, health, generatedAt };
+    return insightFromMemo(memo, health, generatedAt, fallback);
+  });
 
   const finance = specialistMemos.find((m) => m.agentId === "finance");
   return {

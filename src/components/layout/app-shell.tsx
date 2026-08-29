@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { BrandLink, BrandMark } from "@/components/layout/brand-mark";
+import { useBrief } from "@/components/brief/brief-provider";
 import { cn } from "@/lib/cn";
 
 const NAV = [
@@ -40,7 +41,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
-        <p className="px-5 py-4 text-xs text-muted">Tell me what matters. Then do it today.</p>
+        <WorkspaceFooter />
       </aside>
 
       <div className="lg:pl-60">
@@ -82,12 +83,28 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   </Link>
                 ))}
               </nav>
+              <div className="mt-6">
+                <WorkspaceFooter />
+              </div>
             </div>
           </div>
         ) : null}
 
         <main className="px-4 py-6 sm:px-6 lg:px-8">{children}</main>
       </div>
+    </div>
+  );
+}
+
+function WorkspaceFooter() {
+  const { snapshot } = useBrief();
+  return (
+    <div className="space-y-2 px-5 py-4 text-xs text-muted">
+      <p className="font-medium text-ink">{snapshot.context.name}</p>
+      <p>This workspace only. Other businesses are not visible here.</p>
+      <Link href="/enter" className="text-primary hover:underline">
+        Try another demo
+      </Link>
     </div>
   );
 }

@@ -5,7 +5,7 @@ export function ProductPreview() {
         <div>
           <h2 className="text-2xl font-semibold tracking-tight">See the week at a glance</h2>
           <p className="mt-1 text-sm text-muted">
-            Health, cash, and the one call that closes the gap.
+            Health, cash, sales pulse, and the one call that closes the gap.
           </p>
         </div>
       </div>
@@ -14,7 +14,7 @@ export function ProductPreview() {
           <span className="h-2.5 w-2.5 rounded-full bg-[#fecaca]" />
           <span className="h-2.5 w-2.5 rounded-full bg-[#fde68a]" />
           <span className="h-2.5 w-2.5 rounded-full bg-[#bbf7d0]" />
-          <span className="ml-3 text-xs text-muted">dashboard · Daw Hla's Dry Goods</span>
+          <span className="ml-3 text-xs text-muted">dashboard · Daw Hla&apos;s Dry Goods</span>
         </div>
         <div className="grid gap-4 p-5 sm:grid-cols-3">
           <div className="sm:col-span-3 flex flex-wrap items-center justify-between gap-2 rounded-[12px] bg-[#fffbeb] px-4 py-3">

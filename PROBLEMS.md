@@ -228,7 +228,7 @@ Exactly three. Each is a **research combination**, not a tech stack.
 
 **Research:** combo A + E · maps #3, #6, #7, #8 · #4 as signal
 
-**User:** Myanmar shop / wholesale / online-seller owner.
+**User:** Myanmar SME owner or entrepreneur (shop, studio, kitchen, workshop, founder).
 
 **Problem:** They can list sales, who owes them, and what they must pay — and still cannot answer “what do I do today so cash does not break?”
 
@@ -330,7 +330,7 @@ Official 100-point rubric. Research priority used as a tie-break.
 > **Concept A — Cash + Credit + Today’s Action**  
 > (Foundry Decision Brief)
 
-Smallest product: Myanmar shop snapshot → **one executable next decision**, with why and evidence.
+Smallest product: Myanmar business snapshot (SME or founder) → **one executable next decision**, with why and evidence.
 
 | `RULE.md` prefer | Fit |
 | --- | --- |

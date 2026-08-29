@@ -27,7 +27,7 @@ export function ContextForm({
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
       >
-        <span className="text-sm font-semibold">Business context</span>
+        <span className="text-sm font-semibold">Business / venture</span>
         <span className="text-xs text-muted">{open ? "Hide" : "Edit"}</span>
       </button>
       {open ? (
@@ -111,7 +111,7 @@ export function ContextForm({
             </Field>
           </div>
           <div className="sm:col-span-2">
-            <Field label="Inventory note">
+            <Field label="Inventory note (optional)">
               <input
                 className={inputClass}
                 value={financials.inventoryNote}

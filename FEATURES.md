@@ -400,3 +400,38 @@ A reliable English brief on Daw Hla beats an unfinished Burmese chatbot.
 6. Bank question: “We help the owner decide this week. We do not score loans.”
 
 That is the submission. Everything else is extra.
+
+---
+
+# 13. ADDITIONS (same product)
+
+## F-014 — Database design (optional Neon + pgvector)
+
+P0 still runs from the request + in-repo sample when `DATABASE_URL` is empty.
+
+When set: persist shops, payables, receivables, inventory, sessions, messages, and the F-003 decision card. Store practice/trust/reminder chunks in **pgvector** (`vector(768)`, Gemini `text-embedding-004`). **Ledger tools win** — vector hits cannot introduce MMK or customers.
+
+Full design: `docs/DATABASE.md`. Schema: `src/lib/db/schema.ts`.
+
+**Priority:** P2
+
+## F-015 — SME and entrepreneur copilot (challenge lock)
+
+Official brief: smarter **financial** decisions, everyday **management**, practical **growth** for Myanmar SMEs **and** entrepreneurs. Bank motive: strategic support with real impact — not a loan score.
+
+P0 Daw Hla cash path is unchanged. The same JSON brief (`OK` | `WATCH` | `TIGHT`) now covers four pillars. Still **one** 24–48h priority. Do not invent MMK. Do not forecast “you will grow X%.” Do not add TAM, ads, or Market/Growth decks.
+
+| Challenge line | Product |
+| --- | --- |
+| Smarter financial decisions | Finance + `cash_pressure` + `receivable_rank` |
+| Manage the business | Supply (`supplier_pressure`, `slow_stock`) + Resources (`resource_load` — do not hire) |
+| Grow this week | Analytics (`business_pulse` on this snapshot only) + Action (copy reminder) |
+| Bank strategic support | Same card **helps organize numbers for a discussion.** Never “approved” or “you qualify.” |
+
+Crew: Conductor + Finance always. Supply if payables or stock. Resources + Analytics on a full Analyze ask. Books / Action as today.
+
+Samples: Daw Hla (canonical SME) plus a founder/services row. Snapshot = shop, studio, kitchen, workshop, or founder — same tools.
+
+**Priority:** P0 polish (same product, challenge-complete)
+
+

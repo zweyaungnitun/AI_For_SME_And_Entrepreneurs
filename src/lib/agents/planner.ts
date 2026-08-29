@@ -9,8 +9,27 @@ export function heuristicPlan(
 ): { agents: AgentId[]; rationale: string } {
   const hay = message.toLowerCase();
   const agents: AgentId[] = ["finance"];
-  if (ledger.inventory.length > 0) agents.push("ops");
-  agents.push("action");
+
+  if (ledger.inventory.length > 0 || ledger.upcomingExpenses.length > 0) {
+    agents.push("supply");
+  }
+
+  const fullAnalyze =
+    /analy|performance|pulse|business|grow|resource|team|suppl/i.test(hay) ||
+    /what should i do today so cash does not break/i.test(hay) ||
+    hay.includes("cash on hand") ||
+    hay.includes("overdue customer credit");
+
+  const collectOnly = /who (should i |do i )?(collect|follow|call)/i.test(hay) && !fullAnalyze;
+
+  if (!collectOnly) {
+    agents.push("resources");
+    if (fullAnalyze || hay.length > 80) agents.push("analytics");
+  }
+
+  if (ledger.receivables.some((r) => r.status === "overdue" || r.overdueDays > 0)) {
+    agents.push("action");
+  }
 
   const looksLikeNote =
     isBurmese(message) ||
@@ -21,7 +40,7 @@ export function heuristicPlan(
 
   return {
     agents,
-    rationale: `Finance-first copilot for ${ledger.shopType}. Ops only with stock. Books if the message looks like a credit note.`,
+    rationale: `Finance-first SME/founder crew for ${ledger.shopType}. Supply if payables or stock. Resources and analytics on a full analyze. Books if the message looks like a credit note.`,
   };
 }
 

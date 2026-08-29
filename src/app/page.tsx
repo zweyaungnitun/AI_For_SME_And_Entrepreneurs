@@ -14,21 +14,24 @@ export default function Home() {
         <ProductPreview />
         <section className="rounded-[12px] bg-ink px-6 py-10 text-white sm:px-10">
           <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            Open the dashboard. See today&apos;s priority in under a minute.
+            Open your workspace. See today&apos;s priority in under a minute.
           </h2>
           <p className="mt-3 max-w-xl text-sm text-white/70">
-            Demo data is already loaded for Daw Hla&apos;s Dry Goods — cash, credit,
-            and the 5-day supplier payable. Analyze again any time.
+            Open one demo workspace. You see that shop&apos;s cash and credit only —
+            not an admin list of every business.
           </p>
-          <div className="mt-6">
-            <Button href="/dashboard" className="bg-white text-ink hover:bg-[#e5e7eb]">
-              Get started
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Button href="/enter?as=daw-hla" className="bg-white text-ink hover:bg-[#e5e7eb]">
+              Open Daw Hla&apos;s books
+            </Button>
+            <Button href="/enter?as=nandar-studio" variant="secondary">
+              Open founder studio
             </Button>
           </div>
         </section>
         <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border py-8 text-sm text-muted">
-          <p>SME Copilot · Myanmar SMEs</p>
-          <p>What matters · Why · What to do next</p>
+          <p>SME Copilot · Myanmar SMEs and founders</p>
+          <p>Helps organize numbers for a discussion</p>
         </footer>
       </div>
     </div>

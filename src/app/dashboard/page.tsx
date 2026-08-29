@@ -22,7 +22,6 @@ export default function DashboardPage() {
     snapshot,
     status,
     error,
-    mode,
     streamingReply,
     setContext,
     setFinancials,
@@ -41,7 +40,7 @@ export default function DashboardPage() {
               {greeting()}, {snapshot.context.name}
             </h1>
             <p className="mt-1 text-sm text-muted">
-              {snapshot.context.location} · {running ? "Crew is analyzing…" : `${mode} mode`}
+              {snapshot.context.location} · this workspace only
             </p>
           </div>
           <Button onClick={() => void analyze()} disabled={running}>
