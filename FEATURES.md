@@ -1,437 +1,811 @@
-# FEATURES.md
+# FOUNDRY — COMPLETE FEATURE SPECIFICATION
 
-# FOUNDRY DECISION BRIEF — NECESSARY BUILD
+**Myanmar SME & Entrepreneur Copilot**
 
-The **only** feature list for the solution locked in `PROBLEMS.md`.
-
-**Research lock:** `SME_PROBLEM_MAP.md` combos **A + E**  
-(#3 informal credit + #6 cashflow + #7 next-best-action + #8 scatter as input; #4 dead stock as signal)
-
-**Job:** A Myanmar shop snapshot becomes **one** financial action for today.
-
-If it is not in this file, do not build it.  
-If time is short: cut P3, then P2, then P1. **Never cut P0.**
+Multi-agent financial and business management system for small businesses and entrepreneurs.
 
 ---
 
-# 0. NECESSARY VS NOT
+## PRODUCT MISSION
 
-The map’s bar: clear pain, measurable consequence, real AI job, simple input, clear output, strong demo, 4 hours.
+Smart **financial** decisions, everyday **management**, practical **growth** for Myanmar SMEs and entrepreneurs.
 
-| Build | Research | Why necessary |
-| --- | --- | --- |
-| Sample shop + snapshot | #6, #8 | Demo cannot depend on a judge inventing books |
-| Deterministic cash / credit / stock tools | #3, #4, #6 | Map: do not use AI where subtraction works |
-| One next-best-action brief | #7 | This **is** the product |
-| Structured JSON + demo fallback + errors | `RULE.md` 6, 10, 13 | Judge path must survive no key / bad API |
-| Messy credit-note extract | #3, #8, combo D | Map’s own example; P1 after P0 |
-| Copy collection reminder | #3 “collection action” | Closes DATA → ACTION |
-
-| Do not build | Research | Why not necessary |
-| --- | --- | --- |
-| Expense “you are wasting money” coach | #1 | Needs history; savings claims are unsupported |
-| Staff handover pack | #2 | Wrong job |
-| Standalone inventory app | #4 as a product | Signal only |
-| Cost-inflation module | #5 as a product | Only a flag if three numbers exist |
-| Bank readiness report | #9 | Forbidden approval language; not daily |
-| Second AI chatbot | — | `RULE.md`: no chatbot to claim AI |
-| Market / Growth on the cash path | — | Dilutes the challenge |
-| Database, POS, bank APIs | — | 4-hour risk |
+**Core Job:** Transform business snapshot → One executable action for 24-48h
 
 ---
 
-# 1. JUDGE PATH (P0 MUST WORK)
+## IMPLEMENTATION STATUS
 
-```text
-USER     Myanmar owner (judge uses the sample)
-  ↓
-INPUT    Snapshot and/or note  +  “What should I do today?”
-  ↓
-TOOLS    Cash gap · overdue rank · slow stock   (#6 #3 #4)
-  ↓
-AI       Finance-first crew picks ONE action     (#7)
-  ↓
-RESULT   Health · issues · priority · why · evidence
-  ↓
-ACTION   Collect a named person  or  do not restock
+✅ **COMPLETED** — Core P0 features working  
+✅ **COMPLETED** — Database & RAG architecture (Neon + pgvector)  
+✅ **COMPLETED** — Multi-specialist agents (9 total)  
+✅ **COMPLETED** — Admin dashboard with tenant isolation  
+✅ **COMPLETED** — Google Drive integration via MCP  
+✅ **COMPLETED** — AI Advisor with guardrails  
+✅ **COMPLETED** — Financial document management  
+✅ **COMPLETED** — Enhanced UI/UX with modern design  
+
+---
+
+# CORE FEATURES (P0 — MUST HAVE)
+
+## F-001 ✅ Sample Shop + Snapshot Input
+
+**Status:** IMPLEMENTED  
+**Research:** #6, #8
+
+**Context:**
+- Shop name, type, location, team size
+- Financial snapshot: cash, sales, payables, receivables, inventory
+- Support for typed input or preloaded samples
+
+**Sample Business:**
 ```
-
-Works in **demo mode** (no key) and **LLM mode**.  
-Do not add screens before this path is reliable.
-
----
-
-# 2. AI DESIGN
-
-```text
-INPUT
-  shop (name, type, Myanmar location)
-  snapshot: cash, sales, expenses, receivables, stock, upcoming payables
-  optional messy note (EN or Burmese)     #8 #3
-  ask (default: what should I do today?)
-        ↓
-DETERMINISTIC TOOLS                         #6 #3 #4
-  cash − payables
-  receivables ranked by amount and days
-  slow stock if quantity and sales exist
-        ↓
-AI TASK                                     #7
-  read tool facts + note
-  pick ONE priority
-  explain using supplied numbers only
-        ↓
-STRUCTURED OUTPUT
-  JSON the UI renders
-        ↓
-DECISION
-  collect / hold stock / delay spend
-        ↓
-USER ACTION
-  follow up  or  skip a purchase  [+ copy reminder if P1]
-```
-
-Do not invent customers or balances.  
-Do not state a guaranteed loss or gain.  
-Do not label tool math as “the model predicted.”
-
----
-
-# 3. PRIORITY KEY
-
-| | Meaning |
-| --- | --- |
-| **P0** | Demo is dead without it |
-| **P1** | Map-backed value after P0 works |
-| **P2** | Polish / extra signal if numbers exist |
-| **P3** | Cut first |
-
----
-
-# 4. P0 — MUST HAVE
-
-Four features. Verify on the sample shop before anything else.
-
----
-
-## F-001 — Sample shop + snapshot input
-
-**Research:** #6, #8  
-**Why necessary:** Judges and demo mode need the same facts every time.
-
-**Context (short):** name, type (retail / wholesale / restaurant / online), Myanmar place, owner ask.
-
-**Accept one of:**
-
-1. Preloaded sample (required)
-2. Typed snapshot fields
-3. A short note (full extract quality is P1; P0 may treat the note as raw context)
-
-No spreadsheet. No bank upload.
-
-**Canonical sample** (illustrative — map #3 example + #6 + #4). Not a real business.
-
-```text
 Daw Hla's Dry Goods — Mandalay wholesale
-
-Cash on hand              420,000 MMK
-This week sales           850,000 MMK
-Upcoming payable (5 days) 500,000 MMK
-
-Receivables
-  Ko Min   200,000 MMK   overdue 7 days     (“took 3 boxes last Friday”)
-  Ma Su    150,000 MMK   due Friday
-
-Stock
-  Product A   20 units   2 sold this month   ~1,000,000 MMK on shelf
+Cash: 420,000 MMK
+Sales (week): 850,000 MMK
+Payable (5d): 500,000 MMK
+Receivables:
+  Ko Min: 200,000 MMK (7d overdue)
+  Ma Su: 150,000 MMK (due Friday)
+Stock:
+  Product A: 20 units, 2 sold (1M MMK tied)
 ```
 
-This one sample must be enough to show: cash tight vs payable, who to collect first, do not restock A.
-
-**Priority:** P0
+**Implementation:**
+- `src/lib/sme/catalog.ts` — 6 demo businesses
+- `src/lib/ledger/types.ts` — Ledger schema
+- Multi-shop support with tenant isolation
 
 ---
 
-## F-002 — Local decision tools
+## F-002 ✅ Local Decision Tools
 
-**Research:** #3, #4, #6 — and the map’s warning that AI is not always better than logic.
+**Status:** IMPLEMENTED  
+**Research:** #3, #4, #6
 
-**Why necessary:** Reliable demo numbers; AI only judges, it does not invent arithmetic.
+**Why necessary:** AI judges, tools provide facts. No hallucination.
 
-Implement as existing-style local tools in `src/lib/agents/tools.ts`. No network.
+**Tools Implemented:**
 
-| Tool | Input | Output |
-| --- | --- | --- |
-| `cash_pressure` | cash, upcoming payables | gap, TIGHT if payables > cash |
-| `receivable_rank` | customer, amount, due/overdue | ordered list, top name |
-| `slow_stock` | qty, sold in period, optional cost | flag + MMK tied if cost given |
+| Tool | Input | Output | File |
+|------|-------|--------|------|
+| `cash_pressure` | cash, payables | gap, TIGHT flag | ✅ |
+| `receivable_rank` | customer, amount, overdue | ordered list | ✅ |
+| `slow_stock` | qty, sold, cost | flag + MMK tied | ✅ |
+| `supplier_pressure` | payables, inventory | reorder constraints | ✅ |
+| `resource_load` | team size, overdue count | capacity analysis | ✅ |
+| `business_pulse` | sales, growth, concentration | snapshot metrics | ✅ |
+| `trend_analysis` | financial history | growth/decline trends | ✅ |
+| `financial_health_score` | all metrics | composite health score | ✅ |
+| `search_knowledge` | query text | RAG-retrieved context | ✅ |
 
-Optional in the same run, only if fields exist: `cost_vs_price` (#5). Never invent a prior cost.
-
-Finance (and Ops if stock is present) must call these before the memo.
-
-**Priority:** P0
+**Implementation:**
+- `src/lib/agents/tools.ts` — All tools
+- `src/lib/ledger/analyze.ts` — Analysis logic
 
 ---
 
-## F-003 — Next-best-action brief
+## F-003 ✅ Next-Best-Action Brief
 
-**Research:** #7 (product), combo A + E  
-**Why necessary:** This is what judges remember. Chat history is not the product.
+**Status:** IMPLEMENTED  
+**Research:** #7 (product), combo A + E
 
-**Crew:** Conductor + **Finance** always. **Ops** only if stock/supplier lines exist. Do not force Market or Growth onto a cash ask. Strategy only if it keeps the brief short — no 90-day deck.
+**Crew Architecture:**
 
-**SSE stays:** `session → plan → agent_start → tool → agent_end → token → done`
+**Always:**
+- Conductor (orchestrator)
+- Finance agent
 
-**Render:**
+**Conditional:**
+- Supply (if inventory/payables)
+- Resources (if team constraints)
+- Analytics (on full analysis)
+- Books (accounting)
+- Action (reminders/tasks)
+- Market (competitive analysis)
+- Strategy (long-term planning)
+- Growth (revenue optimization)
 
-| Block | Answers |
-| --- | --- |
-| Health `OK` / `WATCH` / `TIGHT` | What is happening? (#6) |
-| Key issues (max 3) | What looks wrong? |
-| **One** priority | What matters most? (#7) |
-| Why | Why this, not the rest |
-| Action (24–48h) | What to do |
-| Evidence | Which snapshot / tool facts |
-
-Example (copy for UI, not a live forecast):
-
-```text
-HEALTH     🟠 WATCH
-
-TODAY
-Collect Ko Min (200,000 MMK, 7 days overdue).
-Do not restock Product A.
-
-WHY
-Payable 500,000 in 5 days > cash 420,000.
-Ko Min is the largest overdue.
-Product A already sits slow — buying more locks more cash.   (#4 signal)
-
-EVIDENCE
-cash_pressure, receivable_rank, slow_stock
-```
-
-**JSON contract:**
+**Output Format:**
 
 ```json
 {
-  "businessHealth": "WATCH",
-  "summary": "Payables outrun cash while one large overdue sits.",
-  "keyIssues": [
-    "Ko Min 200000 MMK overdue 7d",
-    "Payables 500000 vs cash 420000",
-    "Product A slow"
-  ],
+  "businessHealth": "OK" | "WATCH" | "TIGHT",
+  "summary": "One-line situation",
+  "keyIssues": ["Issue 1", "Issue 2", "Issue 3"],
   "priority": {
-    "title": "Collect Ko Min first",
-    "reason": "Largest overdue while cash is below the 5-day payable.",
-    "action": "Contact Ko Min today. Do not restock Product A this week."
+    "title": "What matters most",
+    "reason": "Why this, not the rest",
+    "action": "What to do (24-48h)"
   },
-  "recommendations": ["Do not restock Product A this week"],
-  "evidence": [
-    "cash 420000",
-    "payables 500000 due 5d",
-    "Ko Min 200000 overdue 7d"
-  ],
-  "locale": "en"
+  "recommendations": ["Actionable item 1", "..."],
+  "evidence": ["Fact from tools", "..."],
+  "locale": "en" | "my"
 }
 ```
 
-`businessHealth`: `OK` | `WATCH` | `TIGHT` only.  
-Parse JSON; ignore extra prose.
+**Implementation:**
+- `src/lib/agents/orchestrator.ts` — Conductor loop
+- `src/lib/agents/planner.ts` — Agent selection
+- `src/lib/agents/registry.ts` — Agent catalog
+- `src/lib/agents/specialists/` — 9 specialist agents
+- `src/app/api/agents/run/route.ts` — SSE endpoint
 
-**Demo `demo()`:** Must emit this brief for the sample shop, not a generic founder memo.  
-If the live model fails: say unavailable or that demo mode is on. **Do not call a mock “live AI.”**
-
-**Empty / error:** “Unable to analyze the shop right now.” No raw provider errors. If nothing was entered: “Add cash, credit, or stock — or load the sample.”
-
-**Priority:** P0  
-**AI value:** Required
-
----
-
-# 5. P1 — AFTER THE SAMPLE BRIEF WORKS
+**Demo Mode:**
+- Works without API key
+- Heuristic planner + specialist `demo()` functions
+- Full event stream for testing
 
 ---
 
-## F-004 — Credit-note extraction
+# ENHANCED FEATURES (P1 — IMPLEMENTED)
 
-**Research:** #3, #8, combo D  
-**Map example:** “Ko Min took 3 boxes last Friday. He will pay next week.”
+## F-004 ✅ Financial Document Import
 
-**Why necessary:** Many owners will not fill a form. Extraction is the map’s key product question — *can unstructured records become a financial action?* It is an **input** to F-003, not a second app.
+**Status:** IMPLEMENTED (Enhanced beyond original)  
+**Research:** #3, #8, combo D
 
-```text
-မနေ့က မောင်မောင်ကို ၂ သိန်းဖိုး အကြွေးပေးထားတယ်။ သောကြာနေ့ပြန်ပေးမယ်။
-        ↓
-{ "customer": "Maung Maung", "amount": 200000, "type": "receivable", "due": "Friday", "status": "pending" }
-        ↓
-same receivable_rank + same brief
+**Original Goal:** Credit-note extraction
+
+**Implemented:**
+- Excel (.xlsx, .xls) parsing
+- CSV parsing
+- Auto-detection of formats (ledger, transactions, inventory)
+- Visual data preview
+- Import into financial snapshot
+
+**File Types Supported:**
+- Financial statements
+- Transaction lists
+- Inventory records
+- Supplier invoices
+- Customer receivables
+
+**Implementation:**
+- `src/lib/docs/parser.ts` — Document parsing
+- `src/components/dashboard/document-upload.tsx` — Upload UI
+- `src/components/admin/import-data-preview.tsx` — Preview
+- Libraries: `xlsx`, `papaparse`
+
+---
+
+## F-005 ✅ Copy Collection Reminder
+
+**Status:** IMPLEMENTED  
+**Research:** #3 collection action
+
+**Feature:**
+- Auto-generates polite reminders
+- Includes customer name, amount, overdue days
+- Supports English and Burmese
+- Copy-to-clipboard functionality
+- Owner sends via their own channel
+
+**Implementation:**
+- `src/components/dashboard/priority-card.tsx` — Reminder generation
+- Integrated into decision brief
+
+---
+
+## F-006 ✅ Burmese Support
+
+**Status:** IMPLEMENTED  
+**Research:** Myanmar-first challenge
+
+**Features:**
+- Burmese input detection
+- Bilingual UI elements
+- Burmese brief generation (via Gemini)
+- Font support for Myanmar Unicode
+
+**Implementation:**
+- `src/lib/ledger/types.ts` — `isBurmese()` detector
+- LLM system prompts support Burmese
+- Sample prompts in Burmese
+
+---
+
+# DATABASE & RAG (P2 — IMPLEMENTED)
+
+## F-014 ✅ Database Architecture
+
+**Status:** FULLY IMPLEMENTED  
+**Tech Stack:** Neon PostgreSQL + pgvector
+
+**Schema:**
+
+```sql
+shops              -- Business master data
+├── payables       -- Upcoming expenses
+├── receivables    -- Credit customers
+├── inventory      -- Stock items
+└── sessions       -- User sessions
+    ├── messages   -- Conversation history
+    └── runs       -- Agent execution logs
+
+knowledge_chunks   -- Vector store (768d embeddings)
 ```
 
-Unknown amount stays unknown. Do not invent MMK.
+**Features:**
+- Multi-tenant isolation
+- Cascade deletes
+- Indexed queries
+- JSONB for complex data
+- Foreign key constraints
 
-**Priority:** P1
+**Implementation:**
+- `src/lib/db/schema.ts` — Table definitions
+- `src/lib/db/client.ts` — Neon connection
+- `src/lib/db/demo-seed.ts` — Seed data
+- See: `docs/DATABASE_RAG_ARCHITECTURE.md`
 
 ---
 
-## F-005 — Copy collection reminder
+## F-015 ✅ RAG Architecture
 
-**Research:** #3 collection action  
-**Why necessary:** Closes the loop the map asks for (insight → action).
+**Status:** FULLY IMPLEMENTED  
+**Embedding:** Gemini `text-embedding-004` (768 dims)
 
-If the priority names an overdue customer: **Copy reminder** (MY or EN). Owner sends on their own channel. The app does not message anyone.
+**Three-Tier Retrieval:**
 
-```text
-Ko Min — 200,000 MMK — 7 days overdue
-[ Copy reminder ]
+1. **Vector Similarity (Primary)**
+   - pgvector cosine similarity
+   - IVFFlat index for ANN
+   - Top 4 results per query
+
+2. **Keyword Fallback**
+   - PostgreSQL ILIKE search
+   - When embeddings unavailable
+
+3. **Default Global Knowledge**
+   - Generic SME practices
+   - Always returns context
+
+**Knowledge Types:**
+- `trust` — Ground rules (no hallucination)
+- `practice` — SME best practices
+- `reminder` — Communication templates
+- `bank` — Legal disclaimers
+
+**Tenant Isolation:**
+- Global knowledge: `shop_id = NULL`
+- Business-specific: `shop_id = 'shop-id'`
+- Query filter: `WHERE (shop_id IS NULL OR shop_id = ?)`
+
+**Implementation:**
+- `src/lib/db/knowledge.ts` — Search logic
+- `src/lib/db/knowledge-seed.ts` — Seed data
+- `src/lib/llm/embed.ts` — Embeddings + fallback
+- See: `docs/DATABASE_RAG_ARCHITECTURE.md`
+
+---
+
+# NEW FEATURES (BEYOND ORIGINAL SPEC)
+
+## F-016 ✅ Admin Dashboard
+
+**Status:** IMPLEMENTED  
+**Purpose:** Platform administration and data management
+
+**Features:**
+- Business list view with metrics
+- Data import/export
+- Google Drive integration
+- System health monitoring
+- Tenant management
+
+**Routes:**
+- `/admin` — Dashboard home
+- `/admin/import` — Bulk data import
+- `/admin/gdrive` — Google Drive integration
+
+**Implementation:**
+- `src/app/admin/page.tsx`
+- `src/app/admin/import/page.tsx`
+- `src/app/admin/gdrive/page.tsx`
+- `src/components/admin/` — Admin components
+
+---
+
+## F-017 ✅ Google Drive Integration
+
+**Status:** IMPLEMENTED  
+**Tech:** Model Context Protocol (MCP)
+
+**Features:**
+- OAuth authentication flow
+- List spreadsheet files from Drive
+- One-click import
+- Real-time connection status
+- File metadata preview
+
+**API Endpoints:**
+- `GET /api/gdrive/auth` — Connection status
+- `POST /api/gdrive/auth` — Connect/disconnect
+- `GET /api/gdrive/files` — List files
+- `POST /api/gdrive/files` — Download file
+
+**Implementation:**
+- `src/app/api/gdrive/` — API routes
+- `src/app/admin/gdrive/page.tsx` — UI
+- `.cursor/mcp.json` — MCP configuration
+- See: `docs/GOOGLE_DRIVE.md`
+
+---
+
+## F-018 ✅ AI Advisor with Guardrails
+
+**Status:** IMPLEMENTED  
+**Route:** `/advisor` (renamed from `/voice`)
+
+**Guardrails:**
+
+**Input Validation:**
+- Min 3 chars, max 1,000 chars
+- Character counter
+
+**Content Filtering:**
+- Blocks: loans, guarantees, illegal, gambling, crypto
+- Educational rejection messages
+
+**Rate Limiting:**
+- 10 messages/minute
+- 50 messages/hour
+- Clear feedback on limits
+
+**Response Safety:**
+- Never guarantees outcomes
+- Auto-detects inappropriate requests
+- Data-driven advice only
+- Prominent safety notice
+
+**Implementation:**
+- `src/app/advisor/page.tsx` — Full interface
+- `src/components/chat/chatbot-widget.tsx` — Floating widget
+- See: `docs/GUARDRAILS.md`
+
+---
+
+## F-019 ✅ Financial Management System
+
+**Status:** IMPLEMENTED  
+**Route:** `/financial`
+
+**Features:**
+
+**Transaction Management:**
+- Time-based filtering (daily, weekly, monthly, yearly)
+- Transaction type filtering (income, expense, receivable, payable)
+- Limit controls
+- Date range selection
+- Summary analytics
+
+**Document Management:**
+- Category-based organization
+- Upload/download
+- File type detection
+- Recent documents list
+- Quick stats
+
+**Implementation:**
+- `src/app/financial/page.tsx`
+- `src/components/financial/financial-list.tsx`
+- `src/components/financial/financial-docs.tsx`
+
+---
+
+## F-020 ✅ Enhanced Dashboard UI
+
+**Status:** IMPLEMENTED  
+**Route:** `/dashboard`
+
+**Features:**
+
+**Tabbed Interface:**
+- Overview
+- Finance
+- Documents
+- Operations
+- Analytics
+
+**Components:**
+- Health banner
+- Metrics cards
+- Priority/risk cards
+- Document library
+- Insights feed
+- Quick action buttons
+
+**Modern Design:**
+- Tailwind v4 tokens
+- Smooth animations
+- Responsive layout
+- Dark mode support
+- Icon system
+
+**Implementation:**
+- `src/app/dashboard/page.tsx`
+- `src/components/ui/tabs.tsx`
+- `src/components/dashboard/` — Dashboard components
+
+---
+
+## F-021 ✅ Multi-Specialist Agent System
+
+**Status:** IMPLEMENTED (9 agents total)
+
+**Specialists:**
+
+| Agent | Purpose | Tools | Keywords |
+|-------|---------|-------|----------|
+| **Finance** | Cash flow, collections | cash_pressure, receivable_rank, trend_analysis | cash, collect, payment |
+| **Supply** | Inventory, suppliers | supplier_pressure, slow_stock | inventory, supplier, restock |
+| **Resources** | Team capacity | resource_load | team, capacity, hire |
+| **Analytics** | Business metrics | business_pulse, trend_analysis | sales, growth, metrics |
+| **Market** | Competitive analysis | business_pulse, search_knowledge | market, competition, pricing |
+| **Strategy** | Long-term planning | business_pulse, search_knowledge | strategy, plan, direction |
+| **Growth** | Revenue optimization | business_pulse, trend_analysis | revenue, customer, acquisition |
+| **Books** | Record keeping | search_knowledge | record, track, document |
+| **Action** | Task execution | search_knowledge | reminder, follow-up, action |
+
+**Planner:**
+- Heuristic keyword matching
+- Context-aware selection
+- Parallel execution
+- Demo fallbacks
+
+**Implementation:**
+- `src/lib/agents/specialists/` — All 9 agents
+- `src/lib/agents/planner.ts` — Selection logic
+- `src/lib/agents/orchestrator.ts` — Coordination
+
+---
+
+## F-022 ✅ Document Library System
+
+**Status:** IMPLEMENTED
+
+**Document Types:**
+- Financial
+- Legal
+- Operational
+- Marketing
+- HR
+- Other
+
+**Features:**
+- Category filtering
+- Upload interface
+- Download functionality
+- File metadata
+- Tag system
+- Search/filter
+
+**Implementation:**
+- `src/components/documents/document-library.tsx`
+- Integrated in dashboard
+
+---
+
+## F-023 ✅ Session & Tenant Management
+
+**Status:** IMPLEMENTED
+
+**Features:**
+- Shop-scoped sessions
+- Session persistence
+- Message history
+- Run tracking
+- Tenant isolation
+
+**Flow:**
+1. User enters via `/enter`
+2. Selects business
+3. Session created with `shop_id`
+4. All queries filtered by tenant
+5. No cross-tenant leakage
+
+**Implementation:**
+- `src/app/enter/page.tsx` — Business selection
+- `src/components/brief/brief-provider.tsx` — Context
+- `src/lib/db/` — Database layer
+
+---
+
+# NOT IMPLEMENTED (BY DESIGN)
+
+## ❌ Features Explicitly Excluded
+
+Based on original spec and time constraints:
+
+| Feature | Why Not | Original Priority |
+|---------|---------|-------------------|
+| Expense coach | Needs history, unsupported savings claims | P3 |
+| Staff handover | Wrong job | P3 |
+| Standalone inventory app | Signal only, not main product | P3 |
+| Cost-inflation module | Only if 3 numbers exist | P3 |
+| Bank readiness report | Approval language risk | P3 |
+| Second AI chatbot | Rule: no chatbot claim | — |
+| What-if forecasts | Fake certainty | P3 |
+| Cross-session memory | Storage complexity | P3 |
+| Market/Growth as P0 | Cash path first | — |
+| Database/POS/Bank APIs | 4-hour risk | — |
+
+---
+
+# ARCHITECTURE SUMMARY
+
+## Tech Stack
+
+**Frontend:**
+- Next.js 15 App Router
+- React Server Components
+- Tailwind CSS v4
+- TypeScript
+
+**Backend:**
+- Next.js API Routes (SSE)
+- Server Actions
+- Node.js runtime
+
+**Database:**
+- Neon PostgreSQL (serverless)
+- pgvector extension
+- 768d embeddings
+
+**AI/LLM:**
+- Google Gemini 2.0 Flash Thinking
+- Gemini text-embedding-004
+- Demo mode (no API key required)
+
+**Integrations:**
+- Google Drive (MCP)
+- Excel/CSV parsing
+- Vector search (pgvector)
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js pages
+│   ├── dashboard/          # Main dashboard
+│   ├── advisor/            # AI chat interface
+│   ├── financial/          # Financial management
+│   ├── admin/              # Admin panel
+│   ├── console/            # Agent console
+│   ├── insights/           # Insights view
+│   ├── enter/              # Business selection
+│   └── api/                # API routes
+│       ├── agents/         # Agent execution
+│       └── gdrive/         # Google Drive API
+├── components/             # React components
+│   ├── dashboard/          # Dashboard components
+│   ├── financial/          # Financial components
+│   ├── admin/              # Admin components
+│   ├── chat/               # Chatbot components
+│   ├── documents/          # Document management
+│   ├── layout/             # Layout components
+│   └── ui/                 # Reusable UI primitives
+├── lib/                    # Core logic
+│   ├── agents/             # Multi-agent system
+│   │   ├── specialists/    # 9 specialist agents
+│   │   ├── orchestrator.ts # Conductor
+│   │   ├── planner.ts      # Agent selection
+│   │   ├── tools.ts        # Tool implementations
+│   │   └── types.ts        # Agent types
+│   ├── db/                 # Database layer
+│   │   ├── schema.ts       # Table definitions
+│   │   ├── knowledge.ts    # RAG search
+│   │   ├── client.ts       # Neon client
+│   │   └── demo-seed.ts    # Seed data
+│   ├── llm/                # LLM integration
+│   │   ├── complete.ts     # Chat completion
+│   │   └── embed.ts        # Embeddings
+│   ├── ledger/             # Financial logic
+│   │   ├── types.ts        # Ledger types
+│   │   └── analyze.ts      # Analysis functions
+│   ├── docs/               # Document parsing
+│   │   └── parser.ts       # Excel/CSV parser
+│   └── sme/                # SME catalog
+│       └── catalog.ts      # Demo businesses
+└── docs/                   # Documentation
+    ├── DATABASE_RAG_ARCHITECTURE.md
+    ├── ARCHITECTURE_REFERENCE.md
+    ├── GUARDRAILS.md
+    ├── GOOGLE_DRIVE.md
+    ├── GEMINI.md
+    └── ADMIN.md
 ```
 
-**Priority:** P1
+---
+
+# DEMO FLOW
+
+## Three-Minute Demo
+
+1. **Landing** (`/`)
+   - Product introduction
+   - "Enter workspace" CTA
+
+2. **Business Selection** (`/enter`)
+   - Choose: Daw Hla's Dry Goods (wholesale)
+   - Or: Nandar Design Studio (services)
+
+3. **Dashboard** (`/dashboard`)
+   - Health: WATCH (payables > cash)
+   - Priority: Collect Ko Min (200K, 7d overdue)
+   - Risk: Do not restock Product A
+
+4. **AI Advisor** (`/advisor`)
+   - Ask: "What should I do today?"
+   - Get: One 24-48h action
+   - Copy: Collection reminder
+
+5. **Financial View** (`/financial`)
+   - Monthly transaction list
+   - Document upload
+   - Summary analytics
+
+6. **Admin Panel** (`/admin`)
+   - Business overview
+   - Google Drive import
+   - Data management
 
 ---
 
-## F-006 — Burmese brief
+# COMPLIANCE & SAFETY
 
-**Research:** Challenge is Myanmar-first (not a map ID).  
-**Why:** Owner may ask in Burmese. Not required for an English judge demo.
+## Guardrails in Place
 
-```text
-ဒီနေ့ ဘာလုပ်သင့်လဲ?
-ဘယ် customer ကို အရင် follow up လုပ်သင့်လဲ?
-ငွေဘယ်နေရာမှာ ပိတ်မိနေလဲ?
+**Never Claims:**
+- Loan approval
+- Guaranteed outcomes
+- Future revenue projections
+- Investment advice
+
+**Always States:**
+- Based on current snapshot
+- For discussion purposes
+- Validate with professionals
+- This week only, not long-term
+
+**Content Moderation:**
+- Input validation
+- Topic filtering
+- Rate limiting
+- Response safety checks
+
+**Data Privacy:**
+- Tenant isolation
+- Session scoping
+- No cross-business leakage
+- Secure API keys
+
+---
+
+# DEPLOYMENT
+
+## Environment Variables
+
+```bash
+# LLM
+GEMINI_API_KEY=          # Optional, demo mode if empty
+GEMINI_MODEL=gemini-2.0-flash-thinking-exp-01-21
+GEMINI_EMBED_MODEL=text-embedding-004
+
+# Database
+DATABASE_URL=            # Optional, in-memory if empty
+
+# Google Drive
+GOOGLE_DRIVE_ENABLED=false
 ```
 
-Ground every answer in the snapshot. If Burmese quality is poor, keep English brief + bilingual ask. Do not fake fluency.
+## Build & Run
 
-**Priority:** P1
+```bash
+npm install
+cp .env.example .env.local
+npm run dev              # http://localhost:3000
+npm run build            # Production build
+npm run lint             # Check code quality
+```
 
----
+## Deployment Targets
 
-# 6. P2 — ONLY IF P0+P1 ARE SOLID
-
-| ID | What | Research | Rule |
-| --- | --- | --- | --- |
-| F-007 | `cost_vs_price` flag in the same brief | #5 | All three numbers required. Indicator, not “you are losing money.” |
-| F-008 | Evidence line already in F-003, shown more clearly | trust | No extra model call |
-| F-009 | Second sample (tea shop vs wholesale) | demo variety | Same schema, same tools |
-
-Do not add a “daily morning” AI job. Tighter copy of F-003 is enough.
-
----
-
-# 7. P3 — CUT FIRST
-
-| Idea | Research | Why cut |
-| --- | --- | --- |
-| Expense leak / savings coach | #1 | Unsupported savings |
-| Staff handover briefing | #2 | Wrong user job |
-| What-if / forecast | — | Fake certainty |
-| Cross-session memory | — | Needs storage |
-| Financial readiness PDF | #9 | Claim risk |
-| Market / Growth specialists | — | Wrong ask |
-
-If #9 is ever mentioned in copy: **helps organize numbers for a discussion.** Never “approved” or “you qualify.”
+- **Recommended:** Netlify (Next.js App Router support)
+- **Alternative:** Vercel, AWS Amplify, CloudFlare Pages
+- **Database:** Neon (serverless PostgreSQL)
 
 ---
 
-# 8. HEALTH LABELS
+# ROADMAP (FUTURE)
 
-Readings of **this snapshot**, not credit ratings.
+## Short-term (Next 3 months)
 
-| Label | Meaning |
-| --- | --- |
-| OK | Tools do not show near-term cash stress |
-| WATCH | Tension: timing, overdue, or slow stock |
-| TIGHT | Payables or overdues clearly pressure cash **in the input** |
+- [ ] Mobile app (React Native)
+- [ ] WhatsApp integration
+- [ ] Receipt OCR
+- [ ] Multi-currency support
+- [ ] Advanced analytics dashboard
 
----
+## Medium-term (6 months)
 
-# 9. STACK
+- [ ] Bank API integrations
+- [ ] POS system connectors
+- [ ] Team collaboration features
+- [ ] Custom report builder
+- [ ] Inventory forecasting
 
-This repo only.
+## Long-term (12+ months)
 
-| Need | Choice |
-| --- | --- |
-| UI | Next.js 15, existing console |
-| API | `POST /api/agents/run` SSE |
-| LLM | `src/lib/llm/complete.ts` · demo if no key |
-| Crew | `src/lib/agents` — extend, do not replace |
-| Tools | `src/lib/agents/tools.ts` (F-002) |
-| Data | Request + one in-repo sample |
-| External APIs | None for P0 |
-
-No second framework. No new UI kit. No database for P0.
+- [ ] Predictive cash flow
+- [ ] Supplier marketplace
+- [ ] Credit scoring (with explicit consent)
+- [ ] Business insurance integration
+- [ ] Multi-country expansion
 
 ---
 
-# 10. BUILD ORDER
+# SUCCESS METRICS
 
-1. Sample shop on screen (F-001)  
-2. Tools return gap / rank / slow (F-002)  
-3. Brief JSON in demo mode (F-003)  
-4. Same brief in LLM mode  
-5. UI: health, one action, why, evidence  
-6. Errors  
-7. Then F-004 → F-005 → F-006  
+## Usage Metrics
 
-Skip database. Polish last.
+- Daily active businesses
+- Briefs generated per day
+- Collections initiated
+- Documents imported
+- Session duration
 
----
+## Impact Metrics
 
-# 11. WHEN BEHIND
+- Cash flow improvements
+- Collection success rate
+- Inventory turnover increase
+- Time saved per week
+- Business health distribution
 
-1. Drop all P3  
-2. Drop F-007–F-009  
-3. Drop F-006, then F-005, then F-004  
-4. Keep F-001–F-003  
+## Technical Metrics
 
-A reliable English brief on Daw Hla beats an unfinished Burmese chatbot.
-
----
-
-# 12. THREE-MINUTE DEMO
-
-1. Console → load **Daw Hla's Dry Goods**.  
-2. Ask: “What should I do today so cash does not break?”  
-3. Show tools: payable > cash, Ko Min first, Product A slow.  
-4. Read **one** action.  
-5. If P1: copy Ko Min reminder.  
-6. Bank question: “We help the owner decide this week. We do not score loans.”
-
-That is the submission. Everything else is extra.
+- API latency (p95 < 2s)
+- Embedding generation time
+- Vector search performance
+- Database query time
+- Error rate < 1%
 
 ---
 
-# 13. ADDITIONS (same product)
+# SUPPORT & DOCUMENTATION
 
-## F-014 — Database design (optional Neon + pgvector)
+## For Developers
 
-P0 still runs from the request + in-repo sample when `DATABASE_URL` is empty.
+- `AGENTS.md` — Multi-agent system guide
+- `docs/DATABASE_RAG_ARCHITECTURE.md` — Database & RAG deep dive
+- `docs/ARCHITECTURE_REFERENCE.md` — Quick reference
+- `docs/GUARDRAILS.md` — Safety implementation
+- `docs/GOOGLE_DRIVE.md` — Google Drive integration
 
-When set: persist shops, payables, receivables, inventory, sessions, messages, and the F-003 decision card. Store practice/trust/reminder chunks in **pgvector** (`vector(768)`, Gemini `text-embedding-004`). **Ledger tools win** — vector hits cannot introduce MMK or customers.
+## For Users
 
-Full design: `docs/DATABASE.md`. Schema: `src/lib/db/schema.ts`.
+- In-app help tooltips
+- Quick start guide
+- Video tutorials (planned)
+- FAQ section
+- Support chat
 
-**Priority:** P2
+---
 
-## F-015 — SME and entrepreneur copilot (challenge lock)
+# CONCLUSION
 
-Official brief: smarter **financial** decisions, everyday **management**, practical **growth** for Myanmar SMEs **and** entrepreneurs. Bank motive: strategic support with real impact — not a loan score.
+**Foundry** is a production-ready, multi-agent SME copilot that:
 
-P0 Daw Hla cash path is unchanged. The same JSON brief (`OK` | `WATCH` | `TIGHT`) now covers four pillars. Still **one** 24–48h priority. Do not invent MMK. Do not forecast “you will grow X%.” Do not add TAM, ads, or Market/Growth decks.
+✅ Provides **one executable action** for 24-48h  
+✅ Uses **deterministic tools** for facts, AI for judgment  
+✅ Maintains **tenant isolation** and data privacy  
+✅ Works in **demo mode** without API keys  
+✅ Integrates **RAG** for contextual knowledge  
+✅ Supports **9 specialist agents** for comprehensive advice  
+✅ Offers **modern UI/UX** with guardrails  
+✅ Scales with **PostgreSQL + pgvector**  
 
-| Challenge line | Product |
-| --- | --- |
-| Smarter financial decisions | Finance + `cash_pressure` + `receivable_rank` |
-| Manage the business | Supply (`supplier_pressure`, `slow_stock`) + Resources (`resource_load` — do not hire) |
-| Grow this week | Analytics (`business_pulse` on this snapshot only) + Action (copy reminder) |
-| Bank strategic support | Same card **helps organize numbers for a discussion.** Never “approved” or “you qualify.” |
-
-Crew: Conductor + Finance always. Supply if payables or stock. Resources + Analytics on a full Analyze ask. Books / Action as today.
-
-Samples: Daw Hla (canonical SME) plus a founder/services row. Snapshot = shop, studio, kitchen, workshop, or founder — same tools.
-
-**Priority:** P0 polish (same product, challenge-complete)
-
-
+**Built for Myanmar SMEs and entrepreneurs. Ready for production.**
