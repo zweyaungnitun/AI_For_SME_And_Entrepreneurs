@@ -1,405 +1,389 @@
-# PROBLEM.md
+# PROBLEMS.md
 
 # AI FOR SMEs & ENTREPRENEURS
 
-## Problem Statement
+Source of truth for **the problem** and **the one solution we build**.
 
-### Challenge
+Follows `RULE.md` Phases 1–4.  
+Research intake: `research/SME_PROBLEM_MAP.md`.  
+Build spec: `FEATURES.md` (selected solution only).
 
-How can AI empower Myanmar SMEs and entrepreneurs to make smarter decisions, solve everyday business challenges, and accelerate growth?
-
----
-
-# 1. CORE PROBLEM
-
-Many small and medium-sized businesses generate business information every day through:
-
-* sales
-* expenses
-* inventory
-* customer credit
-* supplier costs
-* cash transactions
-* upcoming payments
-
-However, having business information does not automatically mean having
-clear business insight.
-
-The core problem is:
-
-> **SME owners may have fragmented business information but lack a simple way to understand what matters most and what action they should take next.**
-
-Information exists.
-
-Decision-making remains difficult.
+The official challenge outranks research. Research is **hypothesis**, not proof.
 
 ---
 
-# 2. THE DECISION GAP
+# 0. OFFICIAL CHALLENGE
 
-A typical SME workflow can look like:
+**Topic:** AI for SMEs & Entrepreneurs
+
+**Ask:** How can AI help SMEs and entrepreneurs make smarter decisions, solve everyday problems, and grow?
+
+**Build:** An AI partner for **Myanmar** SMEs — smarter **financial** decisions, everyday management, practical growth.
+
+**Bank motive (FACT — challenge text):** Support SMEs through a stronger strategic connection. AI should create real impact, not a slide deck.
+
+**Not the brief:** TAM essay, loan approval, full ERP, “post more on social.”
+
+**Product question (from research combo A + E):**
+
+> Who owes me money, where is cash tight, and **what should I do today?**
+
+---
+
+# 1. HOW TO READ THIS FILE
+
+| Label | Meaning |
+| --- | --- |
+| **FACT** | Challenge text, or true of this repo / ordinary software |
+| **HYPOTHESIS** | Item from `SME_PROBLEM_MAP.md` — plausible, not universal |
+| **ASSUMPTION** | Needed for a 4-hour demo — stated, not proven |
+
+The research file itself says: do not treat every SME as the same; do not assume informal books, no bank access, or that AI beats simple math; do not promise financial results.
+
+---
+
+# 2. RESEARCH INTAKE
+
+Every map item, judged with the map’s own bar:
+
+1. clear pain  
+2. measurable consequence  
+3. real AI job  
+4. simple input  
+5. clear output  
+6. strong demo  
+7. fits 4 hours  
+
+**Use** = in the selected product. **Signal** = may appear in the brief if the numbers exist. **Out** = do not build.
+
+| Map | Hypothesis | Map MVP | Demo | 4h | Decision | Why |
+| --- | --- | --- | --- | --- | --- | --- |
+| **#6 Cashflow** | Owner cannot turn income, expense, credit, and payables into a short-term cash picture | VERY HIGH | VERY HIGH | MED | **USE** | Challenge is financial decisions. Strongest daily consequence. |
+| **#3 Informal credit** | Credit lives in notebooks, chats, memory | HIGH | HIGH | LOW | **USE** | Map’s own question: can messy notes become a financial action? |
+| **#7 Decision fatigue** | Owner has pieces but no “do this next” | VERY HIGH | VERY HIGH | LOW–MED | **USE — product job** | Map: this is what turns a dashboard into a partner. |
+| **#8 Data scatter** | Facts sit in notes, sheets, receipts, memory | VERY HIGH | HIGH | LOW–MED | **USE — input** | Input path, not a second product. |
+| **#4 Dead stock** | Slow items get re-ordered; cash sits on the shelf | VERY HIGH | VERY HIGH | LOW–MED | **SIGNAL** | Supporting evidence when stock lines exist. Not the whole app. |
+| **#5 Cost inflation** | Cost rose, price did not | VERY HIGH | HIGH | LOW | **SIGNAL** | Only if previous cost, current cost, and price are all present. No guaranteed-loss copy. |
+| **#1 Micro-expenses** | Small spends go unrecorded | HIGH | MED | LOW | **OUT of P0** | Easy to fake “you saved money.” Weak without a history the owner will not type in 4 hours. |
+| **#2 Staff handover** | New person cannot reconstruct cash, stock, follow-ups | HIGH | HIGH | LOW–MED | **OUT** | Strong demo, wrong job: staffing, not this week’s financial decision. |
+| **#9 Bank readiness** | Records are not conversation-ready | HIGH | MED | MED | **OUT** | Map forbids loan-approval claims. Report, not a daily partner. |
+
+## Research combinations (map § PROBLEM COMBINATIONS)
+
+| Combo | Map question | Verdict |
+| --- | --- | --- |
+| **A. Cashflow + receivables** | Who owes me, and what do I prioritize today? | **Core** |
+| **E. Data + next-best-action** | Tell me what to do next. | **Core — the product** |
+| **B. Inventory + cashflow** | Where is my money stuck? | Signal inside the brief |
+| **D. Messy records + AI** | Turn notes into useful information. | Input path for A+E |
+| **C. Expenses + AI** | Where am I quietly losing money? | Out of P0 (same risk as #1) |
+
+**Locked research stack:**
 
 ```text
-Sales
-+
-Expenses
-+
-Inventory
-+
-Receivables
-+
-Supplier Costs
+#8 scatter (how data arrives)
+      +
+#3 credit  +  #6 cash  [+ #4 stock if present]
+      +
+#7 next-best-action (what we ship)
+```
+
+That is map combos **A + E**. Combo B may appear as “do not restock.” Combo D is how a note gets in. Combos C and #9 are not the product.
+
+---
+
+# 3. PHASE 1 — PROBLEM ANALYSIS
+
+## 3.1 Real user
+
+**Primary (locked):**
+
+> Myanmar SME owner who personally decides cash, customer credit, and (often) stock this week — shop, small wholesale, tea shop / restaurant, or online seller.
+
+**FACT:** Challenge audience is Myanmar SMEs and entrepreneurs.
+
+**ASSUMPTION:** They can paste a short snapshot or accept one sample shop. No live POS or bank feed in 4 hours.
+
+**Secondary (not the user):** Bank team that wants SMEs easier to support.
+
+**FACT:** Challenge names that motive.
+
+**ASSUMPTION:** A owner who can act on cash this week is a better partner than a fake “loan-ready” PDF.
+
+---
+
+## 3.2 Pain
+
+**FACT:** Totals on a screen are not a decision.
+
+**HYPOTHESIS (#6, #7, #8):** The owner may have sales, expenses, who owes them, and what they must pay — in pieces — and still cannot answer what to do before the next payable.
+
+```text
+Sales + expenses + credit + stock + supplier bills
         ↓
-Scattered Records
+Scattered records          (#8)
         ↓
-Manual Interpretation
+Mental math / guess        (#7)
         ↓
-Owner's Experience / Guess
-        ↓
-Business Decision
+Business decision
 ```
 
-The problem is not necessarily the absence of data.
+Gap: **DATA → DECISION**
 
-The problem is the gap between:
+They do not need more fields. They need:
 
-> **BUSINESS DATA → BUSINESS DECISION**
-
----
-
-# 3. POSSIBLE SME PAIN POINTS
-
-These are problem hypotheses to investigate and prioritize.
-
-They should NOT automatically be presented as universally true.
+> What is tight, **who to collect or what not to buy**, and **what to do today**.
 
 ---
 
-## 3.1 Unrecorded Micro-Expenses
+## 3.3 Current workaround
 
-Small recurring expenses may be difficult to record consistently.
+**HYPOTHESIS** (map #3, #4, #6, #7):
 
-Examples:
+- Closing-time head math
+- Notebook / Viber / Telegram (“Ko Min took 3 boxes last Friday…”)
+- Ask staff who is overdue
+- Buy because the supplier is at the door (#4)
+- Collect whoever is easiest, not who covers the payable (#3 + #6)
+- Wait until cash *feels* short, then react (#6)
 
-* transportation
-* refreshments
-* delivery
-* small purchases
-* miscellaneous expenses
-
-### Potential consequence
-
-The owner may have limited visibility into where small recurring
-expenses accumulate.
-
-### AI opportunity
-
-Extract, classify, summarize, and identify unusual or recurring
-spending patterns.
+**FACT:** Ordinary software stops at RECORD → STORE → DISPLAY.
 
 ---
 
-## 3.2 Informal Receivable Tracking
+## 3.4 Business consequence
 
-Some businesses may track customer credit through:
+**HYPOTHESIS — possible, not guaranteed:**
 
-* notebooks
-* messages
-* spreadsheets
-* memory
+| If… | Then the owner may… | Map |
+| --- | --- | --- |
+| Large overdue sits while a bill is due | Miss a payable with cash “on paper” | #3 + #6 |
+| Slow SKU gets re-ordered | Lock MMK on the shelf | #4 + #6 |
+| Cost up, price flat | Margin thins without a decision | #5 |
+| Everything looks urgent | Spend the day on the loud task, not the cash task | #7 |
 
-### Potential consequence
-
-It can become difficult to quickly answer:
-
-* Who owes money?
-* How much?
-* When is it due?
-* Who should be followed up first?
-
-### AI opportunity
-
-Convert natural-language or unstructured records into structured
-receivable information and prioritize follow-up actions.
+**Bank (HYPOTHESIS):** An SME that cannot see its own week is harder to support. Connection stays thin. That is a motive, not a feature.
 
 ---
 
-## 3.3 Hidden Slow-Moving Inventory
+## 3.5 Opportunity
 
-A business may hold inventory that sells slowly while continuing to
-purchase additional stock.
-
-### Potential consequence
-
-Capital may remain tied up in inventory.
-
-### AI opportunity
-
-Analyze:
-
-* stock
-* sales velocity
-* purchase frequency
-* time since sale
-
-and identify inventory that may require attention.
-
----
-
-## 3.4 Cost and Margin Visibility
-
-Supplier or input costs may change while selling prices remain unchanged.
-
-### Potential consequence
-
-The business may have reduced margins without immediately noticing.
-
-### AI opportunity
-
-Compare:
-
-Previous Cost
-+
-Current Cost
-+
-Selling Price
-
-and flag possible margin pressure.
-
----
-
-## 3.5 Short-Term Cashflow Visibility
-
-A business may know its sales and expenses but still struggle to see
-short-term cash pressure across:
-
-* available cash
-* receivables
-* upcoming expenses
-* inventory purchases
-
-### Potential consequence
-
-Important payments or purchasing decisions may be made without a complete
-short-term cash picture.
-
-### AI opportunity
-
-Summarize current position and identify potential short-term pressure.
-
----
-
-# 4. DEEPER PROBLEM
-
-These individual problems can be symptoms of a larger issue:
-
-> **SME owners often need to make important decisions from incomplete,
-> scattered, or difficult-to-interpret business information.**
-
-Examples:
+Research #7 is the differentiation: **next-best-action**, not another chart.
 
 ```text
-Should I restock this product?
-
-Should I collect this payment first?
-
-Why is cash becoming tight?
-
-Which expense needs attention?
-
-Should I increase this product's price?
-
-What should I focus on today?
+RECORD → UNDERSTAND → PRIORITIZE → RECOMMEND → ACT
 ```
 
-These are decision questions, not merely reporting questions.
+**Partner, not dashboard:**
+
+> Take this week’s shop facts (typed or messy) and return **one** action for the next 24–48 hours, with why and the numbers used.
+
+Owner value: a decision they can execute.  
+Bank value (honest): a more numerate SME. Not a credit score.
 
 ---
 
-# 5. THE HIDDEN OPPORTUNITY
+## 3.6 AI opportunity
 
-Traditional business software often focuses on:
+The map warns: **do not assume AI is better than deterministic logic.**
+
+| Job | Who does it |
+| --- | --- |
+| Cash vs upcoming payables | Local tool (math) |
+| Rank overdue by amount / days | Local tool (math) |
+| Flag slow stock if qty + sales exist | Local tool (math) |
+| Cost vs price if all three exist | Local tool (math) |
+| Read a messy EN/MY note | AI (#3, #8) |
+| Pick **one** priority when issues compete | AI (#7) |
+| Explain in owner language | AI |
+| Structured brief for the UI | AI |
+
+AI is required for judgment and language. It is not required to subtract two numbers.
 
 ```text
-RECORD
-↓
-STORE
-↓
-DISPLAY
+INPUT     snapshot and/or messy note + ask
+   ↓
+TOOLS     cash gap, credit rank, slow stock
+   ↓
+AI TASK   prioritize, explain, one action
+   ↓
+JSON      health, issues, priority, action, evidence
+   ↓
+DECISION  collect / hold stock / delay spend
+   ↓
+ACTION    follow up a named person or skip a purchase
 ```
 
-An AI-powered approach can extend this to:
+No chatbot that advises with empty books.
+
+---
+
+# 4. THREE SOLUTION CONCEPTS
+
+Exactly three. Each is a **research combination**, not a tech stack.
+
+---
+
+## Concept A — Cash + Credit + Today’s Action
+
+**Research:** combo A + E · maps #3, #6, #7, #8 · #4 as signal
+
+**User:** Myanmar shop / wholesale / online-seller owner.
+
+**Problem:** They can list sales, who owes them, and what they must pay — and still cannot answer “what do I do today so cash does not break?”
+
+**Solution:** Load a sample or paste this week’s numbers / a credit note. Tools compute gaps. Crew returns one brief: health, up to three issues, **one** priority, why, action, evidence.
+
+**AI role:** Extract a messy credit line if needed; choose among competing issues; explain. Not a formatter. Not free chat.
+
+**Journey:**
 
 ```text
-RECORD
-↓
-UNDERSTAND
-↓
-ANALYZE
-↓
-PRIORITIZE
-↓
-RECOMMEND
-↓
-ACT
+Console → sample or paste
+       → “What should I do today?”
+       → tools + finance-first crew
+       → one action (collect Ko Min / do not restock)
+       → copy reminder if P1
 ```
 
-The opportunity is therefore not simply to create another dashboard.
+**Innovation:** Map #7 — decision partner. Myanmar sample. Bank story without underwriting.
 
-The opportunity is to create a:
-
-> **Business Decision Assistant**
-
-that helps transform everyday business information into practical,
-context-aware next actions.
+**Complexity:** Medium (crew already exists).  
+**Demo:** Very high (map: #6 and #7).  
+**Risk:** Scope creep — extra agents and extra map items.
 
 ---
 
-# 6. WHY AI?
+## Concept B — Where is my money stuck?
 
-Traditional software can calculate:
+**Research:** combo B · maps #4, #6 · #5 optional
 
-* totals
-* averages
-* percentages
-* balances
-* inventory counts
+**User:** Owner who holds inventory.
 
-AI becomes more useful when the system needs to:
+**Problem:** Slow stock keeps getting bought; cash sits on the shelf.
 
-* understand messy natural-language input
-* combine multiple pieces of business context
-* identify patterns
-* explain potential problems
-* prioritize competing issues
-* generate recommendations
-* communicate naturally in Burmese
+**Solution:** Stock + velocity in → flagged SKUs, MMK tied up, restock / hold.
 
-Therefore, AI should sit above the business data as an intelligence layer,
-not simply as a chatbot.
+**AI role:** Explain the hold. Most of the work is deterministic (map: AI not always better than math).
+
+**Journey:** Enter lines → see “do not restock A.”
+
+**Innovation:** Sharp SKU story. Map demo = VERY HIGH.
+
+**Complexity:** Low–medium.  
+**Demo:** High for inventory, weak if judges ask who to collect this week.  
+**Risk:** Incomplete challenge answer (financial decisions + manage + grow).
 
 ---
 
-# 7. TARGET USER
+## Concept C — Messy notes, structured books
 
-Primary target:
+**Research:** combo D · maps #8, #3 · cousin of #2
 
-> **Myanmar SME owners and entrepreneurs who manage day-to-day business
-> operations and need practical decision support.**
+**User:** Owner whose week lives in chat and paper.
 
-Possible business types:
+**Problem:** Facts exist; they are not structured, so nothing can be decided.
 
-* retail shops
-* small wholesalers
-* restaurants
-* online sellers
-* service businesses
-* small distributors
-* home-based businesses
+**Solution:** Paste notes → customer / amount / due / stock lines out.
 
-The final target segment should be narrowed after solution selection.
+**AI role:** Extraction. Stops at “here is a table” unless it becomes Concept A.
 
----
+**Journey:** Paste “Ko Min took 3 boxes…” → structured row.
 
-# 8. CORE USER PAIN
+**Innovation:** High AI utilization on language. Map MVP = VERY HIGH.
 
-The user does not necessarily need:
-
-> "More business data."
-
-The user needs:
-
-> **"Tell me what matters, why it matters, and what I should do next."**
+**Complexity:** Low.  
+**Demo:** Extraction wow, then “so what?”  
+**Risk:** A parser, not a partner. Handover (#2) is the same trap: tidy lists, no cash decision.
 
 ---
 
-# 9. DESIRED OUTCOME
+# 5. PHASE 3 — SCORE
 
-The ideal experience is:
+Official 100-point rubric. Research priority used as a tie-break.
 
-```text
-MY BUSINESS DATA
-       ↓
-AI UNDERSTANDS CONTEXT
-       ↓
-AI IDENTIFIES IMPORTANT ISSUES
-       ↓
-AI PRIORITIZES
-       ↓
-AI EXPLAINS WHY
-       ↓
-AI RECOMMENDS NEXT ACTION
-       ↓
-SME OWNER ACTS
-```
+| Criterion | A Cash+credit+action | B Money stuck | C Note parser |
+| --- | ---: | ---: | ---: |
+| Problem & Impact /25 | **23** | 19 | 16 |
+| AI Utilization /25 | **22** | 15 | 20 |
+| Innovation /20 | **16** | 14 | 13 |
+| Execution /20 | **17** | 18 | 18 |
+| Practicality /10 | **9** | 8 | 7 |
+| **Total /100** | **87** | **74** | **74** |
+| 4-hour /5 | **4** | 5 | 5 |
+| Demo reliability /5 | **5** | 4 | 3 |
 
----
+**A wins:** Hits the challenge (financial decision today), uses the map’s strongest combo (A+E), gives AI a real job (#7) and tools a real job (#6, #3), demo is one path.
 
-# 10. PROBLEM STATEMENT — SHORT VERSION
+**B loses:** Map loves the demo; the brief is wider than inventory.
 
-> **Myanmar SMEs and entrepreneurs often have valuable business information
-> spread across daily transactions, expenses, inventory, receivables, and
-> other records, but lack a simple way to turn that information into clear,
-> prioritized business decisions. This can make everyday decisions slower,
-> more manual, and harder to act on confidently.**
+**C loses:** Map loves extraction; the product would stop before the decision. Extraction is **P1 input** for A, not the app.
+
+#9 Bank pack was not a fourth concept (`RULE.md`: exactly three). It fails Practicality (claim risk) and the “daily partner” ask.
 
 ---
 
-# 11. PROBLEM STATEMENT — PITCH VERSION
+# 6. PHASE 4 — DECISION
 
-> **The problem is not that SME owners lack data. The problem is that their
-> data does not easily become decisions. They need to know what is going
-> wrong, what matters most, why it matters, and what they should do next.**
+## Build this
 
----
+> **Concept A — Cash + Credit + Today’s Action**  
+> (Foundry Decision Brief)
 
-# 12. RESEARCH CAUTION
+Smallest product: Myanmar shop snapshot → **one executable next decision**, with why and evidence.
 
-The problem hypotheses in this document are starting points for solution
-exploration.
+| `RULE.md` prefer | Fit |
+| --- | --- |
+| Meaningful problem | This week’s cash and credit (#6, #3) |
+| Clear AI value | One priority + explanation (#7) |
+| Working MVP | Existing crew + demo mode |
+| Strong demo | User → input → AI → result → action |
 
-Do NOT claim that:
+Do not pick A because it has more agents or more features.
 
-* every Myanmar SME has these problems
-* every SME uses informal bookkeeping
-* every SME lacks digital tools
-* every SME cannot access formal financing
-* every identified risk will cause financial loss
+## Locked statements
 
-Use careful language such as:
+**Short:**  
+Myanmar SME owners often hold this week’s sales, credit, and bills in fragments (#8). They lack a simple way to turn that into **one** financial action (#7). Calls get slower and easier to get wrong.
 
-* may
-* can
-* often
-* potentially
-* in some businesses
-* based on user-provided data
+**Pitch:**  
+The problem is not missing data. The data does not become a decision. They need what is tight, what matters most, why, and what to do **today** (research: *Who owes me, and what should I prioritize?*).
 
-The final product should focus on one clearly defined problem rather than
-attempting to solve every SME challenge.
+**Bank (honest):**  
+A shop that can see cash pressure is easier to support. We organize the week’s decision. We do not approve credit (map #9).
+
+**Human still decides.** If A is rejected, build B (dead stock), not C or #9. Do not invent a fourth product.
 
 ---
 
-# 13. HACKATHON DECISION
+# 7. OUT OF SCOPE
 
-The final solution should be selected based on:
+| Do not build | Research reason |
+| --- | --- |
+| Loan score / “bank will approve” | Map #9 forbidden language |
+| Live bank, CB, MPU, POS | 4-hour + no feed (**ASSUMPTION**) |
+| Bookkeeping / inventory ERP | Wrong product |
+| Staff handover briefing | Map #2 — high demo, wrong job |
+| Expense “savings” coach | Map #1 — unsupported savings |
+| Standalone note parser | Combo D without #7 |
+| Generic global founder chat | Wrong user |
+| Multi-week forecast / what-if engine | Not in the map’s 4-hour bar |
 
-1. Meaningful user problem
-2. Clear business impact
-3. Strong AI contribution
-4. Innovation
-5. 4-hour feasibility
-6. Reliable demonstration
-7. Practical usability
-
-The team should choose ONE core problem and build the smallest working
-solution that demonstrates meaningful value.
+Behind schedule: drop P3, then P2, then P1. **Never drop the P0 brief.**
 
 ---
 
-# 14. CORE QUESTION
+# 8. PROBLEM → SOLUTION CONTRACT
 
-The final product should answer:
+| Owner question | Research | Product answers with |
+| --- | --- | --- |
+| Who owes me, who first? | #3, combo A | Ranked receivable + one name |
+| Why is cash tight if sales look fine? | #6 | Cash vs payables vs overdue |
+| Where is money stuck? | #4, combo B | Slow SKU as a **signal**, not a second app |
+| What do I do today? | #7, combo E | Exactly one action |
+| I only have a chat note | #8, #3, combo D | Extract, then same brief |
+| Will the bank approve me? | #9 | **We do not answer that** |
 
-> **"How can AI turn everyday SME business information into a clear,
-> understandable, and actionable next decision?"**
+Judges should hear: Myanmar owner, decision gap, AI changed a pile into one action, something they can do in 24 hours, bank = support not lending.
+
+Necessary features for that contract are in `FEATURES.md`.
