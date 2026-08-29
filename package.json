@@ -5,9 +5,10 @@
   "description": "Multi-agent counsel for SMEs and entrepreneurs",
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postbuild": "echo 'Build completed successfully'"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
