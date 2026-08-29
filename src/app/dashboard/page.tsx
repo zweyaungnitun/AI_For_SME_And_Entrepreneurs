@@ -65,17 +65,20 @@ function DashboardView() {
   );
 
   function handleDocumentParsed(doc: ParsedFinancialDoc) {
-    if (doc.type === "ledger" && doc.data.cashOnHand !== undefined) {
-      setFinancials({
-        cashMmk: String(doc.data.cashOnHand),
-        receivablesMmk: String(
-          doc.data.receivables?.reduce((a, r) => a + r.amount, 0) ?? 0,
-        ),
-        upcomingMmk: String(
-          doc.data.payables?.reduce((a, p) => a + p.amount, 0) ?? 0,
-        ),
-        inventoryNote: snapshot.financials.inventoryNote,
-      });
+    if (doc.type === "ledger") {
+      const ledgerData = doc.data as Partial<import("@/lib/ledger/types").Ledger>;
+      if (ledgerData.cashOnHand !== undefined) {
+        setFinancials({
+          cashMmk: String(ledgerData.cashOnHand),
+          receivablesMmk: String(
+            ledgerData.receivables?.reduce((a, r) => a + r.amount, 0) ?? 0,
+          ),
+          upcomingMmk: String(
+            (ledgerData.upcomingExpenses || []).reduce((a, p) => a + p.amount, 0),
+          ),
+          inventoryNote: snapshot.financials.inventoryNote,
+        });
+      }
     }
   }
 
