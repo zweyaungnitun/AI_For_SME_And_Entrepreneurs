@@ -94,7 +94,7 @@ export function DocumentLibrary({ documents, onUpload, onDelete, onDownload }: D
               Add financial records, contracts, reports, and other business files
             </p>
           </div>
-          <label>
+          <label className="cursor-pointer">
             <input
               type="file"
               className="hidden"
@@ -104,7 +104,7 @@ export function DocumentLibrary({ documents, onUpload, onDelete, onDownload }: D
               }}
               disabled={uploading}
             />
-            <Button as="span" disabled={uploading}>
+            <Button disabled={uploading} type="button">
               {uploading ? "Uploading..." : "Choose file"}
             </Button>
           </label>
