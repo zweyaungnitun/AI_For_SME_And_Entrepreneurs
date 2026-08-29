@@ -181,76 +181,93 @@ http://localhost:3000/console
 
 ## 🔑 AI Configuration
 
+Foundry uses **Google Gemini** as its primary LLM provider.
+
 ### Demo Mode
 
-Leave the API key empty:
+Foundry can run without an API key for hackathon demonstrations.
 
 ```env
-OPENAI_API_KEY=
+GEMINI_API_KEY=
 ```
 
-Foundry will run using its built-in demo workflow without requiring a live LLM API.
+When no API key is provided, Foundry uses its demo workflow so the core product experience can still be demonstrated.
 
 ### Live AI Mode
 
-Configure an OpenAI-compatible provider:
+To enable real Gemini-powered responses, configure your Gemini API key:
 
 ```env
-OPENAI_API_KEY=your_api_key
-OPENAI_BASE_URL=optional_base_url
-OPENAI_MODEL=optional_model
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_MODEL=your_model_name
 ```
 
-The exact model and provider can be configured through the environment variables.
+The selected Gemini model can be configured through the environment variables.
 
 ---
 
 ## 🤖 AI Architecture
 
-Foundry separates the AI system into two layers:
+Foundry uses a **multi-agent AI architecture powered by Google Gemini**.
 
-### Specialist Agents
-
-Each agent receives the user's business problem and analyzes it from its own domain perspective.
+Instead of asking one general-purpose model to handle every task, Foundry assigns the business problem to multiple specialist agents.
 
 ```text
-Business Problem
-      ↓
- ┌──────────┬──────────┬──────────┐
- │ Strategy │ Finance  │ Marketing│
- └──────────┴──────────┴──────────┘
-      ↓
- ┌──────────┬──────────┐
- │   Risk   │Operations│
- └──────────┴──────────┘
-      ↓
-   Crew Output
-      ↓
- Final Recommendation
+                    Business Problem
+                           ↓
+              ┌─────────────────────┐
+              │   Gemini AI Crew     │
+              └─────────────────────┘
+                           ↓
+        ┌──────────┬──────────┬──────────┐
+        │ Strategy │ Finance  │ Marketing│
+        ├──────────┼──────────┼──────────┤
+        │   Risk   │Operations│   Other  │
+        └──────────┴──────────┴──────────┘
+                           ↓
+                 Combined Analysis
+                           ↓
+                 Actionable Counsel
 ```
 
-This approach allows the system to produce a more structured and comprehensive analysis than a single generic response.
+Each specialist provides a focused perspective, and the crew combines those perspectives into a structured response for the user.
+
+---
+
+## 🧠 AI Utilization
+
+AI is the core of Foundry rather than an optional feature.
+
+Google Gemini is used to:
+
+* Analyze business problems
+* Generate specialist perspectives
+* Evaluate risks and opportunities
+* Provide structured recommendations
+* Stream responses progressively through the console
+
+The multi-agent approach allows Foundry to approach a single business problem from multiple specialized perspectives.
 
 ---
 
 ## 🧑‍💻 Cursor Usage
 
-Foundry was developed using **Cursor as an AI-native development tool**.
+**Cursor** was used as the primary AI-native development environment during the hackathon build window.
 
-Cursor was used during the hackathon build process for:
+It was used for:
 
-* Project planning
-* Architecture exploration
+* Architecture and implementation planning
 * Code generation
-* Component implementation
-* Multi-agent workflow development
+* React / Next.js development
+* Multi-agent workflow implementation
+* Gemini integration
 * Debugging
 * Refactoring
-* Testing and iteration
+* Testing
+* Iterative development
 
-The core prototype implementation was created during the official hackathon build window.
+The core implementation was created during the official **4-hour Build Window**.
 
----
 
 ## 🏆 Hackathon Focus
 
