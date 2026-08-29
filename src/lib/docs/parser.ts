@@ -2,9 +2,14 @@ import * as XLSX from "xlsx";
 import Papa from "papaparse";
 import type { Ledger, MoneyLine, StockLine } from "@/lib/ledger/types";
 
+type ParsedLedger = Omit<Partial<Ledger>, "receivables"> & {
+  payables?: MoneyLine[];
+  receivables?: MoneyLine[];
+};
+
 export type ParsedFinancialDoc = {
   type: "ledger" | "transactions" | "inventory";
-  data: Partial<Ledger> | FinancialTransaction[] | StockLine[];
+  data: ParsedLedger | FinancialTransaction[] | StockLine[];
   metadata: {
     fileName: string;
     rowCount: number;
@@ -42,15 +47,15 @@ async function parseCSV(file: File): Promise<ParsedFinancialDoc> {
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
-      complete: (results) => {
+      complete: (results: { data: Record<string, string>[] }) => {
         try {
-          const parsed = processRows(results.data as Record<string, string>[], file.name);
+          const parsed = processRows(results.data, file.name);
           resolve(parsed);
         } catch (err) {
           reject(err);
         }
       },
-      error: (err) => reject(err),
+      error: (err: Error) => reject(err),
     });
   });
 }
@@ -123,8 +128,8 @@ function detectInventoryFormat(headers: string[]): boolean {
   );
 }
 
-function parseLedgerFormat(rows: Record<string, string>[]): Partial<Ledger> {
-  const ledger: Partial<Ledger> = {};
+function parseLedgerFormat(rows: Record<string, string>[]): ParsedLedger {
+  const ledger: ParsedLedger = {};
   const firstRow = rows[0];
 
   // Try to extract cash
@@ -187,70 +192,69 @@ function parseLedgerFormat(rows: Record<string, string>[]): Partial<Ledger> {
 function parseTransactionFormat(
   rows: Record<string, string>[],
 ): FinancialTransaction[] {
-  return rows
-    .map((row) => {
-      const dateKey =
-        Object.keys(row).find((k) => k.toLowerCase().includes("date")) ||
-        "date";
-      const amountKey =
-        Object.keys(row).find((k) =>
-          ["amount", "mmk", "kyat", "value"].some((term) =>
-            k.toLowerCase().includes(term),
-          ),
-        ) || "amount";
-      const descKey =
-        Object.keys(row).find((k) =>
-          ["description", "desc", "note", "memo"].some((term) =>
-            k.toLowerCase().includes(term),
-          ),
-        ) || "description";
-      const typeKey =
-        Object.keys(row).find((k) => k.toLowerCase().includes("type")) || "type";
+  const out: FinancialTransaction[] = [];
+  for (const row of rows) {
+    const dateKey =
+      Object.keys(row).find((k) => k.toLowerCase().includes("date")) || "date";
+    const amountKey =
+      Object.keys(row).find((k) =>
+        ["amount", "mmk", "kyat", "value"].some((term) =>
+          k.toLowerCase().includes(term),
+        ),
+      ) || "amount";
+    const descKey =
+      Object.keys(row).find((k) =>
+        ["description", "desc", "note", "memo"].some((term) =>
+          k.toLowerCase().includes(term),
+        ),
+      ) || "description";
+    const typeKey =
+      Object.keys(row).find((k) => k.toLowerCase().includes("type")) || "type";
 
-      const amount = parseAmount(row[amountKey]);
-      if (!amount || !row[dateKey]) return null;
+    const amount = parseAmount(row[amountKey]);
+    if (!amount || !row[dateKey]) continue;
 
-      return {
-        date: row[dateKey],
-        type: inferTransactionType(row[typeKey], row[descKey], amount),
-        amount: Math.abs(amount),
-        description: row[descKey] || "",
-        category: row["category"] || row["Category"],
-      };
-    })
-    .filter((t): t is FinancialTransaction => t !== null);
+    out.push({
+      date: row[dateKey],
+      type: inferTransactionType(row[typeKey], row[descKey], amount),
+      amount: Math.abs(amount),
+      description: row[descKey] || "",
+      category: row["category"] || row["Category"] || "",
+    });
+  }
+  return out;
 }
 
 function parseInventoryFormat(rows: Record<string, string>[]): StockLine[] {
-  return rows
-    .map((row) => {
-      const productKey =
-        Object.keys(row).find((k) =>
-          ["product", "item", "name", "sku"].some((term) =>
-            k.toLowerCase().includes(term),
-          ),
-        ) || "product";
-      const qtyKey =
-        Object.keys(row).find((k) =>
-          ["quantity", "qty", "stock", "count"].some((term) =>
-            k.toLowerCase().includes(term),
-          ),
-        ) || "quantity";
-      const costKey = Object.keys(row).find((k) =>
-        ["cost", "price", "value"].some((term) => k.toLowerCase().includes(term)),
-      );
+  const out: StockLine[] = [];
+  for (const row of rows) {
+    const productKey =
+      Object.keys(row).find((k) =>
+        ["product", "item", "name", "sku"].some((term) =>
+          k.toLowerCase().includes(term),
+        ),
+      ) || "product";
+    const qtyKey =
+      Object.keys(row).find((k) =>
+        ["quantity", "qty", "stock", "count"].some((term) =>
+          k.toLowerCase().includes(term),
+        ),
+      ) || "quantity";
+    const costKey = Object.keys(row).find((k) =>
+      ["cost", "price", "value"].some((term) => k.toLowerCase().includes(term)),
+    );
 
-      const qty = parseAmount(row[qtyKey]);
-      if (!row[productKey] || !qty) return null;
+    const qty = parseAmount(row[qtyKey]);
+    if (!row[productKey] || !qty) continue;
 
-      return {
-        product: row[productKey],
-        qty,
-        cost: costKey ? parseAmount(row[costKey]) : undefined,
-        soldRecently: row["sold"] ? parseAmount(row["sold"]) : undefined,
-      };
-    })
-    .filter((s): s is StockLine => s !== null);
+    out.push({
+      product: row[productKey],
+      qty,
+      cost: costKey ? parseAmount(row[costKey]) : undefined,
+      soldRecently: row["sold"] ? parseAmount(row["sold"]) : undefined,
+    });
+  }
+  return out;
 }
 
 function inferTransactionType(

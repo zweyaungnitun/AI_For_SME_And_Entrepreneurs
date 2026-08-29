@@ -21,7 +21,9 @@ export function ImportDataPreview({ doc }: { doc: ParsedFinancialDoc }) {
           </span>
         </div>
 
-        {doc.type === "ledger" && doc.data.cashOnHand !== undefined && (
+        {doc.type === "ledger" &&
+          !Array.isArray(doc.data) &&
+          doc.data.cashOnHand !== undefined && (
           <LedgerPreview data={doc.data} />
         )}
 

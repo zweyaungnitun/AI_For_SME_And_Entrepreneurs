@@ -10,15 +10,9 @@ import { HealthBadge } from "@/components/ui/badge";
 import { cn } from "@/lib/cn";
 
 const NAV = [
-<<<<<<< Updated upstream
   { href: "/dashboard", label: "Today", icon: TodayIcon },
   { href: "/insight", label: "Why", icon: InsightIcon },
   { href: "/voice", label: "Ask", icon: MicIcon },
-=======
-  { href: "/dashboard", label: "Dashboard", icon: GridIcon },
-  { href: "/insight", label: "Insight", icon: InsightIcon },
-  { href: "/advisor", label: "AI Advisor", icon: MicIcon },
->>>>>>> Stashed changes
 ];
 
 const RECORDS_NAV = [
@@ -29,6 +23,7 @@ const RECORDS_NAV = [
 ];
 
 const TOOLS_NAV = [
+  { href: "/advisor", label: "AI Advisor" },
   { href: "/admin", label: "Admin" },
   { href: "/admin/import", label: "Import" },
   { href: "/admin/gdrive", label: "Google Drive" },

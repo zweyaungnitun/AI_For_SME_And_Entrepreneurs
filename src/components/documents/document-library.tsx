@@ -104,9 +104,11 @@ export function DocumentLibrary({ documents, onUpload, onDelete, onDownload }: D
               }}
               disabled={uploading}
             />
-            <Button as="span" disabled={uploading}>
-              {uploading ? "Uploading..." : "Choose file"}
-            </Button>
+            <span className="inline-flex">
+              <Button disabled={uploading}>
+                {uploading ? "Uploading..." : "Choose file"}
+              </Button>
+            </span>
           </label>
         </div>
       </Card>

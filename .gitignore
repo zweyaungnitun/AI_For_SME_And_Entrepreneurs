@@ -37,8 +37,9 @@ coverage/
 playwright-report/
 test-results/
 
-# vercel / typescript
+# vercel / netlify / typescript
 .vercel
+.netlify
 *.tsbuildinfo
 
 # os

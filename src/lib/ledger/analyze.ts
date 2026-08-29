@@ -55,6 +55,9 @@ export function analyzeLedger(ledger: Ledger) {
     recvTotal === 0 || !topCustomer
       ? 0
       : Math.round((topCustomer.amount / recvTotal) * 100);
+  const stockUnits = sum(ledger.inventory.map((item) => item.units));
+  const stockSold = sum(ledger.inventory.map((item) => item.soldThisMonth));
+  const stockTurnover = stockUnits === 0 ? 0 : stockSold / stockUnits;
 
   return {
     cashOnHand: ledger.cashOnHand,
@@ -65,6 +68,7 @@ export function analyzeLedger(ledger: Ledger) {
     overdueTotal,
     recvTotal,
     recvConcentration,
+    stockTurnover,
     slow,
     tiedInSlow,
     cashGap,

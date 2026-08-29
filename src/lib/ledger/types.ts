@@ -18,6 +18,20 @@ export type StockItem = {
   unitCost: number;
 };
 
+/** Parsed import rows (Excel/CSV). Not the shop ledger shape. */
+export type MoneyLine = {
+  customer: string;
+  amount: number;
+  due?: string;
+};
+
+export type StockLine = {
+  product: string;
+  qty: number;
+  cost?: number;
+  soldRecently?: number;
+};
+
 export type ShopType =
   | "wholesale"
   | "retail"
