@@ -65,13 +65,13 @@ function LedgerPreview({ data }: { data: Partial<{ cashOnHand: number; receivabl
           </div>
         )}
         
-        {data.payables && (
+        {data.upcomingExpenses && (
           <div className="rounded-lg border border-border bg-background p-4">
-            <p className="text-xs text-muted">Total payables</p>
+            <p className="text-xs text-muted">Upcoming expenses</p>
             <p className="mt-1 text-xl font-semibold">
-              {mmk(data.payables.reduce((a, p) => a + p.amount, 0))}
+              {mmk(data.upcomingExpenses.reduce((a, p) => a + p.amount, 0))}
             </p>
-            <p className="mt-1 text-xs text-muted">{data.payables.length} suppliers</p>
+            <p className="mt-1 text-xs text-muted">{data.upcomingExpenses.length} items</p>
           </div>
         )}
       </div>
@@ -93,7 +93,7 @@ function LedgerPreview({ data }: { data: Partial<{ cashOnHand: number; receivabl
                   <tr key={i}>
                     <td className="py-2">{r.customer}</td>
                     <td className="py-2 font-medium">{mmk(r.amount)}</td>
-                    <td className="py-2 text-muted">{r.due || "—"}</td>
+                    <td className="py-2 text-muted">{r.overdueDays > 0 ? `${r.overdueDays}d overdue` : r.status}</td>
                   </tr>
                 ))}
               </tbody>
@@ -219,9 +219,9 @@ function TransactionsPreview({
   );
 }
 
-function InventoryPreview({ data }: { data: StockLine[] }) {
-  const totalValue = data.reduce((a, s) => a + (s.cost || 0) * s.qty, 0);
-  const totalUnits = data.reduce((a, s) => a + s.qty, 0);
+function InventoryPreview({ data }: { data: StockItem[] }) {
+  const totalValue = data.reduce((a, s) => a + s.unitCost * s.units, 0);
+  const totalUnits = data.reduce((a, s) => a + s.units, 0);
 
   return (
     <div className="space-y-3">
@@ -260,12 +260,12 @@ function InventoryPreview({ data }: { data: StockLine[] }) {
             <tbody className="divide-y divide-border">
               {data.map((item, i) => (
                 <tr key={i}>
-                  <td className="py-2">{item.product}</td>
-                  <td className="py-2">{item.qty}</td>
-                  <td className="py-2 text-muted">{item.cost ? mmk(item.cost) : "—"}</td>
-                  <td className="py-2 text-muted">{item.soldRecently ?? "—"}</td>
+                  <td className="py-2">{item.sku}</td>
+                  <td className="py-2">{item.units}</td>
+                  <td className="py-2 text-muted">{mmk(item.unitCost)}</td>
+                  <td className="py-2 text-muted">{item.soldThisMonth}</td>
                   <td className="py-2 font-medium">
-                    {item.cost ? mmk(item.cost * item.qty) : "—"}
+                    {mmk(item.unitCost * item.units)}
                   </td>
                 </tr>
               ))}

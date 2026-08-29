@@ -89,7 +89,7 @@ Stock:
 ## F-003 ✅ Next-Best-Action Brief
 
 **Status:** IMPLEMENTED  
-**Research:** #7 (product), combo A + E
+**Research:** #7 (product), combo A + E  
 
 **Crew Architecture:**
 
