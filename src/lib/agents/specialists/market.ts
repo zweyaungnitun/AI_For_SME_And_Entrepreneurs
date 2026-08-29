@@ -49,13 +49,9 @@ Return JSON {summary, bullets}.`,
       );
     }
 
-    if (snap.stockTurnover && snap.stockTurnover < 0.1) {
+    if (snap.slow.length > 0) {
       bullets.push(
-        `Slow stock movement suggests demand mismatch or pricing issue. Consider: lower price, bundle offers, or switch suppliers.`,
-      );
-    } else if (snap.stockTurnover && snap.stockTurnover > 0.5) {
-      bullets.push(
-        `Fast stock movement: demand is strong. Negotiate better supplier terms or raise prices slightly to improve margins.`,
+        `Slow stock movement (${snap.slow.length} items): ${mmk(snap.tiedInSlow)} tied up. Consider: lower price, bundle offers, or switch suppliers.`,
       );
     }
 

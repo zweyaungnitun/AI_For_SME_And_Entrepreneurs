@@ -162,16 +162,10 @@ export async function runTool(
           insights.push("Sales steady month-over-month. Focus on margins and efficiency.");
         }
 
-        if (snap.stockTurnover) {
-          if (snap.stockTurnover < 0.1) {
-            insights.push(
-              "Inventory moving slowly — cut reorder quantities or switch suppliers.",
-            );
-          } else if (snap.stockTurnover > 0.5) {
-            insights.push(
-              "Inventory turning fast — strong demand signal. Lock supplier terms for next cycle.",
-            );
-          }
+        if (snap.slow.length > 0) {
+          insights.push(
+            `Inventory moving slowly (${snap.slow.length} items, ${mmk(snap.tiedInSlow)} tied up) — cut reorder quantities or switch suppliers.`,
+          );
         }
 
         return {
@@ -179,7 +173,8 @@ export async function runTool(
           salesChangePct: salesChange,
           currentMonth: ledger.monthSales,
           lastMonth: ledger.lastMonthSales,
-          stockTurnover: snap.stockTurnover,
+          slowStockItems: snap.slow.length,
+          slowStockValue: snap.tiedInSlow,
           insights,
           warning: "Based on this snapshot only. Not a 90-day forecast.",
         };
