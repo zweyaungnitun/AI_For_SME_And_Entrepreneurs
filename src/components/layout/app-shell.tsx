@@ -14,39 +14,110 @@ const NAV = [
   { href: "/voice", label: "Voice", icon: MicIcon },
 ];
 
+const ADMIN_NAV = [
+  { href: "/admin", label: "Admin Panel", icon: AdminIcon },
+  { href: "/admin/import", label: "Import Data", icon: UploadIcon },
+  { href: "/admin/gdrive", label: "Google Drive", icon: DriveIcon },
+];
+
+const QUICK_ACTIONS = [
+  { href: "/dashboard?tab=finance", label: "Financials", icon: DollarIcon },
+  { href: "/dashboard?tab=documents", label: "Documents", icon: FileIcon },
+  { href: "/dashboard?tab=analytics", label: "Analytics", icon: ChartIcon },
+];
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const showChatbot = !pathname.startsWith("/admin") && !pathname.startsWith("/enter");
+  const isAdminRoute = pathname.startsWith("/admin");
 
   return (
     <div className="min-h-screen bg-background">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-border bg-surface lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-border bg-surface lg:flex">
         <div className="px-5 py-5">
           <BrandLink size="sm" />
         </div>
-        <nav className="flex flex-1 flex-col gap-1 px-3">
-          {NAV.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-                  active ? "bg-[#eff6ff] text-primary" : "text-muted hover:bg-[#f3f4f6] hover:text-ink",
-                )}
-              >
-                <item.icon />
-                {item.label}
-              </Link>
-            );
-          })}
+
+        {/* Main Navigation */}
+        <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-2">
+          <div>
+            <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted">
+              Main
+            </p>
+            <div className="space-y-1">
+              {NAV.map((item) => {
+                const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                      active
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted hover:bg-muted/20 hover:text-ink",
+                    )}
+                  >
+                    <item.icon />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div>
+            <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted">
+              Quick Access
+            </p>
+            <div className="space-y-1">
+              {QUICK_ACTIONS.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted transition-colors hover:bg-muted/20 hover:text-ink"
+                >
+                  <item.icon />
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Admin Section */}
+          <div>
+            <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted">
+              Admin Tools
+            </p>
+            <div className="space-y-1">
+              {ADMIN_NAV.map((item) => {
+                const active = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                      active
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted hover:bg-muted/20 hover:text-ink",
+                    )}
+                  >
+                    <item.icon />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
         </nav>
+
         <WorkspaceFooter />
       </aside>
 
-      <div className="lg:pl-60">
+      <div className="lg:pl-64">
         <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-surface/90 px-4 py-3 backdrop-blur lg:hidden">
           <BrandLink size="sm" />
           <button
@@ -68,23 +139,73 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               aria-label="Close menu"
               onClick={() => setOpen(false)}
             />
-            <div className="absolute inset-y-0 left-0 w-64 bg-surface p-4 shadow-xl">
+            <div className="absolute inset-y-0 left-0 w-72 overflow-y-auto bg-surface p-4 shadow-xl">
               <BrandMark size="sm" />
-              <nav className="mt-6 flex flex-col gap-1">
-                {NAV.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setOpen(false)}
-                    className={cn(
-                      "rounded-xl px-3 py-3 text-sm font-medium",
-                      pathname === item.href ? "bg-[#eff6ff] text-primary" : "text-ink",
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
+              
+              {/* Mobile Nav */}
+              <nav className="mt-6 space-y-6">
+                <div>
+                  <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted">
+                    Main
+                  </p>
+                  {NAV.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium",
+                        pathname === item.href
+                          ? "bg-primary/10 text-primary"
+                          : "text-ink hover:bg-muted/20",
+                      )}
+                    >
+                      <item.icon />
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+
+                <div>
+                  <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted">
+                    Quick Access
+                  </p>
+                  {QUICK_ACTIONS.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-muted hover:bg-muted/20 hover:text-ink"
+                    >
+                      <item.icon />
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+
+                <div>
+                  <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted">
+                    Admin Tools
+                  </p>
+                  {ADMIN_NAV.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium",
+                        pathname === item.href
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted hover:bg-muted/20",
+                      )}
+                    >
+                      <item.icon />
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
               </nav>
+
               <div className="mt-6">
                 <WorkspaceFooter />
               </div>
@@ -103,11 +224,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 function WorkspaceFooter() {
   const { snapshot } = useBrief();
   return (
-    <div className="space-y-2 px-5 py-4 text-xs text-muted">
-      <p className="font-medium text-ink">{snapshot.context.name}</p>
-      <p>This workspace only. Other businesses are not visible here.</p>
-      <Link href="/enter" className="text-primary hover:underline">
-        Try another demo
+    <div className="space-y-3 border-t border-border px-5 py-4">
+      <div>
+        <p className="text-xs font-semibold text-ink">{snapshot.context.name}</p>
+        <p className="mt-1 text-xs text-muted">{snapshot.context.location}</p>
+      </div>
+      <div className="flex items-center gap-2 text-xs">
+        <div className="h-2 w-2 rounded-full bg-green-500" />
+        <span className="text-muted">Workspace active</span>
+      </div>
+      <Link
+        href="/enter"
+        className="block rounded-lg border border-border px-3 py-2 text-center text-xs font-medium text-muted transition-colors hover:border-primary hover:text-primary"
+      >
+        Switch workspace
       </Link>
     </div>
   );
@@ -148,6 +278,61 @@ function MicIcon() {
         strokeWidth="1.8"
         strokeLinecap="round"
       />
+    </svg>
+  );
+}
+
+function AdminIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M12 1L3 5v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V5l-9-4z" />
+      <path d="M9 12l2 2 4-4" />
+    </svg>
+  );
+}
+
+function UploadIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="17 8 12 3 7 8" />
+      <line x1="12" y1="3" x2="12" y2="15" />
+    </svg>
+  );
+}
+
+function DriveIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+
+function DollarIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="12" y1="1" x2="12" y2="23" />
+      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+    </svg>
+  );
+}
+
+function FileIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+      <polyline points="13 2 13 9 20 9" />
+    </svg>
+  );
+}
+
+function ChartIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="18" y1="20" x2="18" y2="10" />
+      <line x1="12" y1="20" x2="12" y2="4" />
+      <line x1="6" y1="20" x2="6" y2="14" />
     </svg>
   );
 }
